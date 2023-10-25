@@ -8,18 +8,18 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.security.MessageDigest;
 import java.util.Scanner;
 
 public class View extends JFrame {
-    private BorderLayout borderLayout;
+
     public View (){
         super();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setName("Ensamblador");
         setSize(720, 480);
         setLocationRelativeTo(null);
-        borderLayout = new BorderLayout();
         this.setVisible(true);
     }
 
@@ -56,6 +56,8 @@ public class View extends JFrame {
         select.setActionCommand("selectFile");
         select.addActionListener(listener);
 
+        select.setSize(50, 50);
+
         selectLabel = new JLabel("Selecciona el archivo a ensamblar (.asm)");
         selectLabel.setHorizontalAlignment(JLabel.CENTER);
         selectLabel.setVerticalAlignment(JLabel.CENTER);
@@ -64,6 +66,9 @@ public class View extends JFrame {
         fileNameArea = new JTextArea();
         fileNameArea.setText(fileName);
         fileNameArea.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        fileNameArea.setColumns(1);
+
 
         fileNameArea.setBounds(0, 0, 300, 50);
 
@@ -79,7 +84,7 @@ public class View extends JFrame {
         springLayout.putConstraint(SpringLayout.SOUTH, selectLabel, 6, SpringLayout.VERTICAL_CENTER, content);
         springLayout.putConstraint(SpringLayout.WEST, selectLabel, 6, SpringLayout.WEST, fileNameArea);
 
-        springLayout.putConstraint(SpringLayout.EAST, fileNameArea, 6, SpringLayout.HORIZONTAL_CENTER, content);
+        springLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER, fileNameArea, -select.getWidth(), SpringLayout.HORIZONTAL_CENTER, content);
         springLayout.putConstraint(SpringLayout.NORTH, fileNameArea, 6, SpringLayout.SOUTH, selectLabel);
 
         springLayout.putConstraint(SpringLayout.WEST, select, 6, SpringLayout.EAST, fileNameArea);
@@ -101,15 +106,12 @@ public class View extends JFrame {
 
     }
 
-    public void updateUI(Container container) {
-        container.validate();
-        container.repaint();
-    }
-
-    public void showAssembledPage(ActionListener listener){
+    public void showAssembledPage(ActionListener listener, String leftContent, String rightContent){
         JPanel header;
         JButton first;
         JLabel title;
+
+        SpringLayout headerLayout;
 
         JSplitPane splitPane;
 
@@ -130,12 +132,28 @@ public class View extends JFrame {
         first.addActionListener(listener);
         first.setActionCommand("firstPage");
 
-        first.setSize(48,48);
+        headerLayout = new SpringLayout();
 
-        header = new JPanel( new FlowLayout(FlowLayout.LEADING) );
+        header = new JPanel( );
+        header.setSize(720, 200);
+        header.setMinimumSize(new Dimension(720, 48));
+        header.setMaximumSize(new Dimension(720, 48));
+        header.setPreferredSize(new Dimension(720, 48));
+
+        header.setLayout(headerLayout);
+
+        headerLayout.minimumLayoutSize(header);
+        headerLayout.maximumLayoutSize(header);
+        headerLayout.preferredLayoutSize(header);
 
         header.add(first);
         header.add(title);
+
+        headerLayout.putConstraint(SpringLayout.WEST, first, 8, SpringLayout.WEST, header);
+        headerLayout.putConstraint(SpringLayout.HORIZONTAL_CENTER, title, 0, SpringLayout.HORIZONTAL_CENTER, header);
+        headerLayout.putConstraint(SpringLayout.VERTICAL_CENTER, title, 0, SpringLayout.VERTICAL_CENTER, header);
+        headerLayout.putConstraint(SpringLayout.VERTICAL_CENTER, first, 0, SpringLayout.VERTICAL_CENTER, header);
+
 
         container.add(header, BorderLayout.NORTH);
 
@@ -161,6 +179,7 @@ public class View extends JFrame {
 
 
     }
+
     public File getFile() throws FileNotFoundException, ProcessCanceledException, Exception{
         JFileChooser chooser = new JFileChooser();
         chooser.setAcceptAllFileFilterUsed(false);
@@ -176,5 +195,9 @@ public class View extends JFrame {
             throw  new Exception("Error al seleccionar el archivo");
         }
         return  null;
+    }
+    public void updateUI(Container container) {
+        container.validate();
+        container.repaint();
     }
 }

@@ -24,7 +24,7 @@ public class Model {
             while (scanner.hasNextLine()){
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");
-                pseudoInstructions.put(parts[0], parts[1]);
+                pseudoInstructions.put(parts[0], null);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -42,10 +42,6 @@ public class Model {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-    }
-
-    public void restartFile(){
 
     }
 
