@@ -17,15 +17,19 @@ public class Model {
 
     public  Model() {
         pseudoInstructions = new HashMap<>();
+        String pathBase = new File("").getAbsolutePath();
 
-        File pseudoInstructionsFile = new File("src/main/resources/pseudoInstructions.cfg");
+        File pseudoInstructionsFile = new File(pathBase+"\\src\\main\\settings\\pseudoInstructions.cfg");
+
         try {
             Scanner scanner = new Scanner(pseudoInstructionsFile);
             while (scanner.hasNextLine()){
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");
-                pseudoInstructions.put(parts[0], null);
+                pseudoInstructions.put(parts[0].toUpperCase(), null);
+                System.out.println(pseudoInstructions.toString());
             }
+            System.out.println("Termino el constructor");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -47,7 +51,7 @@ public class Model {
 
     public String getNextLine() throws FileIsEndedException{
         if (scanner.hasNextLine()){
-            return scanner.nextLine();
+            return scanner.nextLine().toUpperCase();
         } else throw new FileIsEndedException("No more lines");
     }
 

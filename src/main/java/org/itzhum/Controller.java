@@ -32,8 +32,11 @@ public class Controller implements ActionListener {
             try {
                 String line = model.getNextLine();
                 if(model.isPseudoInstruction(line)){
+                    //TODO: Procesar pseudo instruccion
+                    System.out.println("Pseudo instruction");
                 }
                 System.out.println(line);
+
             } catch (FileIsEndedException e) {
                 isFinished = true;
             }
@@ -44,8 +47,8 @@ public class Controller implements ActionListener {
 
     private void goToAssembledPage() {
 
-        view.showAssembledPage(this,"","");
         separateLines();
+        view.showAssembledPage(this,"","");
 
     }
     @Override

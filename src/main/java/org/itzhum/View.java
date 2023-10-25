@@ -67,7 +67,7 @@ public class View extends JFrame {
         fileNameArea.setText(fileName);
         fileNameArea.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        fileNameArea.setColumns(1);
+        fileNameArea.setRows(1);
 
 
         fileNameArea.setBounds(0, 0, 300, 50);
