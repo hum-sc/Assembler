@@ -1,19 +1,18 @@
 package org.itzhum;
 import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
-        JFrame f = new JFrame();
-        JButton b = new JButton("Hola");
-        b.setBounds(130,100,100,40);
-        f.add(b);
+        View view = new View();
+        Model model = new Model();
+        Controller controller = new Controller(view, model);
 
-        f.setSize(400,500);
+        controller.start();
 
-        f.setLayout(null);
-
-        f.setVisible(true);
-
-
+        System.out.println("end");
     }
 }
