@@ -1,9 +1,12 @@
 package org.itzhum;
 import org.itzhum.exceptions.FileIsEndedException;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Model {
@@ -12,24 +15,72 @@ public class Model {
     public HashMap<String, String> instructions;
 
     public HashMap<String, String> pseudoInstructions;
-    public HashMap<String, String> registers;
+    public HashMap<String, String> registersComplete;
+    public  HashMap<String, String> registersHalf;
     public HashMap<String, String> labels;
 
-    public  Model() {
+    public List<AssemblerComponent> components;
+
+    static String pseudoInstruction = "PesudoInstruccion";
+    static String instruction = "Instruccion";
+    static String registerComplete = "Registro";
+    static String registerHalf = "Registro";
+    static String tag = "Etiqueta";
+    static String caracterConstant = "Caracter constante";
+    static String byteDecimalConstant = "Constante decimal";
+    static String byteHexadecimalConstant = "Constante hexadecimal";
+    static String byteBinaryConstant = "Constante binaria";
+    static String wordDecimalConstant = "Constante decimal";
+    static String wordHexadecimalConstant = "Constante hexadecimal";
+    static String wordBinaryConstant = "Constante binaria";
+    static String unknown = "Desconocido";
+
+    static String symbol = "Simbolo";
+
+    public Model() {
         pseudoInstructions = new HashMap<>();
+        instructions = new HashMap<>();
+        registersComplete = new HashMap<>();
+        registersHalf = new HashMap<>();
+        components = new ArrayList<>();
+
         String pathBase = new File("").getAbsolutePath();
 
-        File pseudoInstructionsFile = new File(pathBase+"\\src\\main\\settings\\pseudoInstructions.cfg");
+        File configFile = new File(pathBase+"\\src\\main\\settings\\pseudoInstructions.cfg");
 
         try {
-            Scanner scanner = new Scanner(pseudoInstructionsFile);
+            Scanner scanner = new Scanner(configFile);
             while (scanner.hasNextLine()){
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");
                 pseudoInstructions.put(parts[0].toUpperCase(), null);
-                System.out.println(pseudoInstructions.toString());
             }
-            System.out.println("Termino el constructor");
+
+            configFile = new File(pathBase+"\\src\\main\\settings\\instructions.cfg");
+            scanner = new Scanner(configFile);
+            while (scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                instructions.put(parts[0].toUpperCase(), null);
+            }
+
+            configFile = new File(pathBase+"\\src\\main\\settings\\registersComplete.cfg");
+            scanner = new Scanner(configFile);
+            while (scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                registersComplete.put(parts[0].toUpperCase(), null);
+            }
+
+            configFile = new File(pathBase+"\\src\\main\\settings\\registersHalf.cfg");
+            scanner = new Scanner(configFile);
+            while (scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                registersHalf.put(parts[0].toUpperCase(), null);
+            }
+            
+            
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -49,17 +100,47 @@ public class Model {
 
     }
 
-    public String getNextLine() throws FileIsEndedException{
+    public void setComponent(String component, String type){
+
+      components.add(new AssemblerComponent(component.replace("\t", ""), type));
+    }
+    public String getNextLine(){
+        String line;
         if (scanner.hasNextLine()){
-            return scanner.nextLine().toUpperCase();
-        } else throw new FileIsEndedException("No more lines");
+            line =  scanner.nextLine().toUpperCase();
+
+            while (line.startsWith(" ")||line.startsWith("\t")){
+                line = line.substring(1);
+            }
+            while (line.endsWith(" ")||line.endsWith("\t")){
+                line = line.substring(0, line.length()-1);
+            }
+            return line;
+        } else return null;
     }
 
-    public boolean isIntruction(String line){
-        return instructions.containsKey(line);
-    }
-    public boolean isPseudoInstruction(String line){
-        return pseudoInstructions.containsKey(line);
+    public String getFile(){
+        String fileString = "";
+        int lineNumber = 0;
+        try {
+            scanner = new Scanner(file);
+            while (scanner.hasNextLine()){
+               fileString = fileString.concat(lineNumber+":\t"+getNextLine()+"\n");
+               lineNumber++;
+            }
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return fileString;
     }
 
+    public String getComponentList(){
+        //TODO: Que todo quede alineado
+        String list = "";
+        for (AssemblerComponent component: components) {
+            list = list.concat(component.name + "\t" + component.type+ "\n");
+        }
+        return list;
+    }
 }

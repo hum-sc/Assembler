@@ -14,11 +14,13 @@ import java.util.Scanner;
 
 public class View extends JFrame {
 
+    static int height = 480;
+    static int width = 920;
     public View (){
         super();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setName("Ensamblador");
-        setSize(720, 480);
+        setSize(width, height);
         setLocationRelativeTo(null);
         this.setVisible(true);
     }
@@ -135,7 +137,7 @@ public class View extends JFrame {
         headerLayout = new SpringLayout();
 
         header = new JPanel( );
-        header.setSize(720, 200);
+        header.setSize(720, 48);
         header.setMinimumSize(new Dimension(720, 48));
         header.setMaximumSize(new Dimension(720, 48));
         header.setPreferredSize(new Dimension(720, 48));
@@ -160,16 +162,16 @@ public class View extends JFrame {
         //Parte central de la pantalla
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        DataPanel dataPanel = new DataPanel(leftContent, splitPane);
+        splitPane.setLeftComponent(dataPanel);
 
-        JTextArea textArea = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        splitPane.setLeftComponent(scrollPane);
 
-        JTextArea textArea2 = new JTextArea();
-        JScrollPane scrollPane2 = new JScrollPane(textArea2);
-        splitPane.setRightComponent(scrollPane2);
+        DataPanel dataPanell = new DataPanel(rightContent, splitPane);
+        splitPane.setRightComponent(dataPanell);
 
-        splitPane.setDividerLocation(360);
+
+
+        splitPane.setDividerLocation(460);
         splitPane.setEnabled(true);
 
         container.add(splitPane, BorderLayout.CENTER);
@@ -178,17 +180,23 @@ public class View extends JFrame {
         updateUI(container);
 
 
+
+
     }
 
     public File getFile() throws FileNotFoundException, ProcessCanceledException, Exception{
         JFileChooser chooser = new JFileChooser();
-        chooser.setAcceptAllFileFilterUsed(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivo ensamblador (*.asm)","asm");
-        chooser.setFileFilter(filter);
 
         int retVal = chooser.showOpenDialog(this);
         if ( retVal == JFileChooser.APPROVE_OPTION ) {
-            return chooser.getSelectedFile();
+            File file = chooser.getSelectedFile();
+            if(file.getName().endsWith(".asm")){
+                return file;
+            } else {
+                JOptionPane.showMessageDialog(this, "El archivo seleccionado no es un archivo .asm", "Error", JOptionPane.ERROR_MESSAGE);
+                return getFile();
+
+            }
         } else if( retVal == JFileChooser.CANCEL_OPTION ){
             throw new ProcessCanceledException( "El usuario canceló el proceso" );
         } else if (retVal == JFileChooser.ERROR_OPTION) {
