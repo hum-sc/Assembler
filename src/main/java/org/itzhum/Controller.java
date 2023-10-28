@@ -17,8 +17,6 @@ public class Controller implements ActionListener {
         super();
         this.view = view;
         this.model = model;
-
-        model.setFile(new File("C:\\Users\\hum-s\\Downloads\\plantillaNueva.asm"));
     }
 
     public boolean isInstruction(String line){

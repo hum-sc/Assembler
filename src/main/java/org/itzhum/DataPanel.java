@@ -22,6 +22,7 @@ public class DataPanel extends JPanel implements ActionListener {
         navigationBar.add(next);
 
         textArea = new JTextArea(20,460/14);
+        textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setText(content);
         scrollPane = new JScrollPane(textArea);
@@ -30,6 +31,7 @@ public class DataPanel extends JPanel implements ActionListener {
         scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
         parent.add(this);
 
     }

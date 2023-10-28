@@ -36,6 +36,7 @@ public class Model {
     static String unknown = "Desconocido";
 
     static String symbol = "Simbolo";
+    private int maxLineLength = 0;
 
     public Model() {
         pseudoInstructions = new HashMap<>();
@@ -101,8 +102,8 @@ public class Model {
     }
 
     public void setComponent(String component, String type){
-
-      components.add(new AssemblerComponent(component.replace("\t", ""), type));
+        if (component.length() > maxLineLength) maxLineLength = component.length();
+        components.add(new AssemblerComponent(component.replace("\t", ""), type));
     }
     public String getNextLine(){
         String line;
@@ -138,8 +139,16 @@ public class Model {
     public String getComponentList(){
         //TODO: Que todo quede alineado
         String list = "";
+        String spaces = "";
+        System.out.println(maxLineLength);
+        int componentLength = 0;
         for (AssemblerComponent component: components) {
-            list = list.concat(component.name + "\t" + component.type+ "\n");
+            componentLength = component.name.length();
+            System.out.println(componentLength);
+            System.out.println("spacesmax"+ (maxLineLength-componentLength));
+
+            spaces = " ".repeat((maxLineLength - componentLength));
+            list = list.concat(component.name+spaces+"\t"+component.type+ "\n");
         }
         return list;
     }
