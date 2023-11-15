@@ -193,7 +193,7 @@ public class View extends JFrame {
             if(file.getName().endsWith(".asm")){
                 return file;
             } else {
-                JOptionPane.showMessageDialog(this, "El archivo seleccionado no es un archivo .asm", "Error", JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("El archivo seleccionado no es un archivo .asm");
                 return getFile();
 
             }
@@ -203,6 +203,9 @@ public class View extends JFrame {
             throw  new Exception("Error al seleccionar el archivo");
         }
         return  null;
+    }
+    public void showErrorMessage(String message){
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
     public void updateUI(Container container) {
         container.validate();

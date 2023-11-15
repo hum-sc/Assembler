@@ -23,7 +23,7 @@ public class DataPanel extends JPanel implements ActionListener {
 
         textArea = new JTextArea(20,460/14);
         textArea.setEditable(false);
-        textArea.setLineWrap(true);
+        textArea.setLineWrap(false);
         textArea.setText(content);
         scrollPane = new JScrollPane(textArea);
         add(navigationBar, BorderLayout.SOUTH);

@@ -1,9 +1,11 @@
 package org.itzhum;
-import org.itzhum.exceptions.FileIsEndedException;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import org.itzhum.types.ComponentType;
+import org.itzhum.types.SizeType;
+import org.itzhum.types.SymbolType;
+
+import java.awt.event.WindowStateListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,23 +21,11 @@ public class Model {
     public  HashMap<String, String> registersHalf;
     public HashMap<String, String> labels;
 
+    public List<Symbol> symbols;
+
     public List<AssemblerComponent> components;
 
-    static String pseudoInstruction = "PesudoInstruccion";
-    static String instruction = "Instruccion";
-    static String registerComplete = "Registro";
-    static String registerHalf = "Registro";
-    static String tag = "Etiqueta";
-    static String caracterConstant = "Caracter constante";
-    static String byteDecimalConstant = "Constante decimal";
-    static String byteHexadecimalConstant = "Constante hexadecimal";
-    static String byteBinaryConstant = "Constante binaria";
-    static String wordDecimalConstant = "Constante decimal";
-    static String wordHexadecimalConstant = "Constante hexadecimal";
-    static String wordBinaryConstant = "Constante binaria";
-    static String unknown = "Desconocido";
-
-    static String symbol = "Simbolo";
+    public HashMap<Integer, String> errors;
     private int maxLineLength = 0;
 
     public Model() {
@@ -44,6 +34,9 @@ public class Model {
         registersComplete = new HashMap<>();
         registersHalf = new HashMap<>();
         components = new ArrayList<>();
+        errors = new HashMap<>();
+
+        symbols = new ArrayList<>();
 
         String pathBase = new File("").getAbsolutePath();
 
@@ -94,6 +87,7 @@ public class Model {
         this.file = file;
         try {
             this.scanner = new Scanner(file);
+            System.out.println(scanner.hasNext());
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -101,9 +95,12 @@ public class Model {
 
     }
 
-    public void setComponent(String component, String type){
+    public void addComponent(String component, ComponentType type){
         if (component.length() > maxLineLength) maxLineLength = component.length();
         components.add(new AssemblerComponent(component.replace("\t", ""), type));
+    }
+    public void setError(Integer lineNumber, String error){
+        errors.put(lineNumber, error);
     }
     public String getNextLine(){
         String line;
@@ -117,16 +114,30 @@ public class Model {
                 line = line.substring(0, line.length()-1);
             }
             return line;
-        } else return null;
+        } else {
+            return null;
+        }
+    }
+
+    public void resetScanner(){
+        try {
+            scanner = new Scanner(file);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public String getFile(){
         String fileString = "";
         int lineNumber = 0;
         try {
-            scanner = new Scanner(file);
+            resetScanner();
             while (scanner.hasNextLine()){
-               fileString = fileString.concat(lineNumber+":\t"+getNextLine()+"\n");
+               fileString = fileString.concat(lineNumber+":\t"+getNextLine());
+               if(errors.containsKey(lineNumber)){
+                   fileString = fileString.concat("Error: "+errors.get(lineNumber)+"\n");
+               }
+                fileString = fileString.concat("\n");
                lineNumber++;
             }
         }catch (Exception e) {
@@ -136,17 +147,46 @@ public class Model {
         return fileString;
     }
 
+    public boolean findSymbol(String goal){
+        for (Symbol symbol: symbols) {
+            if (symbol.getName().equals(goal)){
+                return true;
+            }
+        }
+        return false;
+    }
+    public void addSymbol(String name, SymbolType type, String value, SizeType size, int direction) throws Exception{
+        if(findSymbol(name)){
+            throw new Exception("El simbolo "+name+" ya existe");
+        }
+        Symbol<String> symbol = new Symbol<>(name, type, value, size, direction);
+
+        symbols.add(symbol);
+    }
+
+    public void addSymbol(String name, SymbolType type, int value, SizeType size, int direction) throws Exception{
+        if(findSymbol(name)){
+            throw new Exception("El simbolo "+name+" ya existe");
+        }
+        Symbol<Integer> symbol = new Symbol<>(name, type, value, size, direction);
+
+        symbols.add(symbol);
+    }
+    public void addSymbol(String name, SymbolType type, ArrayList value, SizeType size, int direction) throws Exception{
+        if(findSymbol(name)){
+            throw new Exception("El simbolo "+name+" ya existe");
+        }
+        Symbol<ArrayList> symbol = new Symbol<>(name, type, value, size, direction);
+
+        symbols.add(symbol);
+    }
     public String getComponentList(){
         //TODO: Que todo quede alineado
         String list = "";
         String spaces = "";
-        System.out.println(maxLineLength);
         int componentLength = 0;
         for (AssemblerComponent component: components) {
             componentLength = component.name.length();
-            System.out.println(componentLength);
-            System.out.println("spacesmax"+ (maxLineLength-componentLength));
-
             spaces = " ".repeat((maxLineLength - componentLength));
             list = list.concat(component.name+spaces+"\t"+component.type+ "\n");
         }

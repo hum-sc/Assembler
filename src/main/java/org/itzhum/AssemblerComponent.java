@@ -1,9 +1,12 @@
 package org.itzhum;
 
-public class AssemblerComponent {
-    public String name, type;
+import org.itzhum.types.ComponentType;
 
-    public AssemblerComponent(String name, String type){
+public class AssemblerComponent {
+    public String name;
+    public ComponentType type;
+
+    public AssemblerComponent(String name, ComponentType type){
         this.name = name;
         this.type = type;
     }
