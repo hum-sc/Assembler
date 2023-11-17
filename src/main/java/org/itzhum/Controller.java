@@ -1,9 +1,11 @@
 package org.itzhum;
 import org.itzhum.exceptions.ProcessCanceledException;
 import org.itzhum.types.ComponentType;
+import org.itzhum.types.OperandType;
 import org.itzhum.types.SizeType;
 import org.itzhum.types.SymbolType;
 
+import javax.naming.CompositeName;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,7 +20,7 @@ public class Controller implements ActionListener {
         super();
         this.view = view;
         this.model = model;
-        model.setFile(new File("C:\\Users\\hum-s\\Documents\\ene.asm"));
+        model.setFile(new File("C:\\Users\\hum-s\\Documents\\plantillaBienItzel.asm"));
     }
 
     public boolean isInstruction(String line){
@@ -87,6 +89,7 @@ public class Controller implements ActionListener {
     }
 
     public boolean isComment(String line){
+        line = line.trim();
         return  line.startsWith(";");
     }
 
@@ -134,7 +137,6 @@ public class Controller implements ActionListener {
         int size;
         if(component.startsWith("DUP(")){
             if(!component.endsWith(")")) throw new Exception("Falta el simbolo de cerrado");
-            model.addComponent(component, ComponentType.PseudoInstruccion);
             component = component.substring(4, component.length()-1);
             if(isByteNumberConstant(component)){
                 int number = componentToNumber(component);
@@ -157,7 +159,6 @@ public class Controller implements ActionListener {
         int size;
         if(component.startsWith("DUP(")){
             if(!component.endsWith(")")) throw new Exception("Falta el simbolo de cerrado");
-            model.addComponent(component, ComponentType.PseudoInstruccion);
             component = component.substring(4, component.length()-1);
 
             if(!isWordNumberConstant(component)){
@@ -173,126 +174,18 @@ public class Controller implements ActionListener {
             return array;
         } else throw new Exception("Se necesita la directiva DUP");
     }
-/*
-    public void separateLines(){
-        String line;
-        StringBuilder component;
 
-        boolean possibleCommentDoubleQuote;
-        boolean possibleCommentSingleQuote;
-        boolean isCompounded;
-
-        while (model.scanner.hasNext()){
-            possibleCommentDoubleQuote = false;
-            possibleCommentSingleQuote = false;
-            isCompounded = false;
-            line = model.getNextLine();
-            component = new StringBuilder();
-            if (isComment(line)) continue;
-            if (line.isEmpty() || line.isBlank()) continue;
-
-            if(isPseudoInstruction(line)){
-                model.addComponent(line, null);
-                continue;
-            }
-            for(char c: line.toCharArray()) {
-                if (c == ';') break;
-                if ((component.toString().equals("DUP(") || component.toString().equals("[")) && !isCompounded) {
-                    isCompounded = true;
-                }
-                if ((c == ')' || c == ']') && isCompounded) {
-                    isCompounded = false;
-                }
-                if (!isCompounded) {
-                    if (c == '"' && !possibleCommentSingleQuote) {
-                        if (!possibleCommentDoubleQuote){
-                            if (!component.isEmpty()) model.addComponent(component.toString(), null);
-                            component = new StringBuilder();
-                        }
-                        possibleCommentDoubleQuote = !possibleCommentDoubleQuote;
-
-                        if (!possibleCommentDoubleQuote) {
-                            component.append(c);
-                            model.addComponent(component.toString(), null);
-                            component = new StringBuilder();
-                            continue;
-                        }
-                    }
-
-                    if (c == '\'' && !possibleCommentDoubleQuote) {
-                        if (!possibleCommentSingleQuote) {
-                            if (!component.isEmpty()) {
-                                model.addComponent(component.toString(), null);
-
-                            }
-                            component = new StringBuilder();
-                        }
-                        possibleCommentSingleQuote = !possibleCommentSingleQuote;
-                        if (!possibleCommentSingleQuote) {
-                            component.append(c);
-                            model.addComponent(component.toString(), null);
-                            component = new StringBuilder();
-                            continue;
-                        }
-                    }
-                    if (isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
-                        if (!component.isEmpty()) {
-                            model.addComponent(component.toString(), c==':'? ComponentType.Etiqueta:null);
-
-                        }
-                        component = new StringBuilder();
-                        continue;
-                    }
-                }
-                component.append(c);
-            }
-            if((!component.isEmpty()) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote && !isCompounded){
-                model.addComponent(component.toString(), null);
-            } else if (possibleCommentDoubleQuote || possibleCommentSingleQuote || isCompounded){
-                separateNotClosedCompounded(component.toString());
-            }
-
-
+    public boolean isTag(String component){
+        if(component.endsWith(":")){
+            component = component.substring(0, component.length()-1);
+            return isValidSymbol(component);
         }
-
-
-
+        if(model.findSymbol(component)){
+            Symbol symbol = model.getSymbol(component);
+            return symbol.getType() == SymbolType.Etiqueta;
+        }
+        return false;
     }
-
-        public void identifyComponents(){
-            for (AssemblerComponent component : model.components){
-                if (component.type == null){
-                    if(isPseudoInstruction(component.name)){
-                        component.type =ComponentType.PseudoInstruccion;
-                    } else if (isInstruction(component.name)){
-                        component.type = ComponentType.Instruccion;
-                    } else if(isRegisterHalf(component.name)){
-                        component.type = ComponentType.RegistroMedio;
-                    } else if(isRegistersComplete(component.name)){
-                        component.type = ComponentType.RegistroCompleto
-                    } else if(isCaracterConstant(component.name)){
-                        component.type =ComponentType.CaracterConstante;
-                    } else if(isByteDecimalConstant(component.name)) {
-                        component.type = ComponentType.ConstanteDecimal;
-                    } else if(isByteHexadecimalConstant(component.name)){
-                        component.type = ComponentType.ConstanteHexadecimal;
-                    } else if(isByteBinaryConstant(component.name)){
-                        component.type = ComponentType.ConstanteBinaria;
-                    } else if(isWordDecimalConstant(component.name)){
-                        component.type = ComponentType.Desconocido;
-                    } else if(isWordHexadecimalConstant(component.name)){
-                        component.type = Model.wordHexadecimalConstant;
-                    } else if(isWordBinaryConstant(component.name)){
-                        component.type = Model.wordBinaryConstant;
-                    } else if(isValidSymbol(component.name)){
-                        component.type = Model.symbol;
-                    } else {
-                        component.type = Model.unknown;
-                    }
-                }
-            }
-        }
-    */
 
     public ComponentType identifyComponent(String component){
         if(isPseudoInstruction(component)) return ComponentType.PseudoInstruccion;
@@ -306,8 +199,44 @@ public class Controller implements ActionListener {
         if(isWordDecimalConstant(component)) return ComponentType.ConstanteDecimalWord;
         if(isWordHexadecimalConstant(component)) return ComponentType.ConstanteHexadecimalWord;
         if(isWordBinaryConstant(component)) return ComponentType.ConstanteBinariaWord;
+        if(isTag(component)) return ComponentType.Etiqueta;
         if(isValidSymbol(component)) return ComponentType.Simbolo;
         return ComponentType.Desconocido;
+    }
+
+    public OperandType identifyOperand(String component){
+        ComponentType componentType = identifyComponent(component);
+
+        switch (componentType) {
+            case RegistroBajo -> {
+                return OperandType.REGISTERBYTE;
+            }
+            case RegistroCompleto -> {
+                return OperandType.REGISTERWORD;
+            }
+            case Etiqueta -> {
+                if(model.findSymbol(component)){
+                    return OperandType.TAG;
+                }
+                else return OperandType.INVALID;
+            }
+            case ConstanteDecimalByte, ConstanteHexadecimalByte, ConstanteBinariaByte, ConstanteBinariaWord, ConstanteDecimalWord, ConstanteHexadecimalWord, CaracterConstante -> {
+                return OperandType.INMEDIATE;
+            }
+            case Simbolo -> {
+                if(model.findSymbol(component)){
+                    Symbol symbol = model.getSymbol(component);
+
+                    if(symbol.getSize() == SizeType.Byte)
+                        return OperandType.MEMORYBYTE;
+                    else return OperandType.MEMORYWORD;
+                }
+                else return OperandType.INVALID;
+            }
+            default -> {
+                return OperandType.INVALID;
+            }
+        }
     }
     public void analysisSyntacticSemantic(){
         model.resetScanner();
@@ -436,6 +365,7 @@ public class Controller implements ActionListener {
                                     component = result[0];
 
                                     ArrayList list = arrayByte(component, number);
+                                    model.addComponent(component, ComponentType.PseudoInstruccion);
 
                                     if (!line.isEmpty() && !isComment(line)) {
                                         throw new Exception("Se esperaba el fin de la linea");
@@ -524,14 +454,62 @@ public class Controller implements ActionListener {
                     }
                 }
                 if (inCodeSegment){
-                    //TODO: CODE SEGMENT ANALYSIS}
+                    String[] result;
+                    result = getNextComponent(line);
+                    line = result[1];
+                    component = result[0];
+
+                    if(isInstruction(component)){
+                        model.addComponent(component, ComponentType.Instruccion);
+                        Instruction instruction = model.getInstruction(component);
+                        if(line.isEmpty() || isComment(line)){
+                            boolean isSintaxCorrect = instruction.checkSintax();
+                            if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"sin operandos");
+                            //TODO: Aumentar el CP
+                            counterProgram+=8;
+
+                        } else{
+                            result = getNextComponent(line);
+                            line = result[1];
+                            component = result[0];
+                            OperandType type = identifyOperand(component);
+                            if(type == OperandType.INVALID) throw new Exception("Se esperaba un operando valido");
+                            if(line.isEmpty()|| isComment(line)){
+                                boolean isSintaxCorrect = instruction.checkSintax(type);
+                                if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString());
+                                model.addComponent(component, identifyComponent(component));
+                                //TODO: Aumentar el CP
+                                counterProgram+=16;
+                            } else{
+                                model.addComponent(component, identifyComponent(component));
+                                result = getNextComponent(line);
+                                line = result[1];
+                                component = result[0];
+
+                                OperandType type2 = identifyOperand(component);
+                                if(type2 == OperandType.INVALID) throw new Exception("Se esperaba un operando valido");
+                                boolean isSintaxCorrect = instruction.checkSintax(type, type2);
+                                if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString()+" y "+type2.toString());
+                                model.addComponent(component, identifyComponent(component));
+                                counterProgram+=16;
+                            }
+                        }
+                    } else if(isTag(component)){
+                        component = component.substring(0,component.length()-1);
+                        model.addSymbol(component, SymbolType.Etiqueta, counterProgram, null, counterProgram);
+                        model.addComponent(component, ComponentType.Etiqueta);
+
+                    } else throw new Exception("Se esperaba una instruccion o simbolo");
 
 
                 }
+
+                if(!inCodeSegment && !inDataSegment && !inStackSegment){
+                    throw new Exception("Se trata de escribir fuera de un segmento");
+                }
+
             } catch (Exception e){
                 model.setError(lineCoutner, e.getMessage());
-                System.out.println(component+" , "+ e.getMessage()+" , "+ line);
-
                 boolean isCausedByCaracterConstant = e.getCause() != null && e.getCause().getMessage().equals(ComponentType.CaracterConstante.toString());
                 if(!component.isEmpty() && !isCausedByCaracterConstant){
                     model.addComponent(component, identifyComponent(component));
@@ -583,7 +561,7 @@ public class Controller implements ActionListener {
         //separateLines();
         //identifyComponents();
         analysisSyntacticSemantic();
-        view.showAssembledPage(this,model.getFile(),model.getComponentList());
+        view.showAssembledPage(this,model.getFile(),model.getComponentList(),model.getErrors(), model.getErrorLines(), model.getSymbolData());
 
     }
 
@@ -614,6 +592,8 @@ public class Controller implements ActionListener {
             case "firstPage":
                 model.errors.clear();
                 model.components.clear();
+                model.symbols.clear();
+
 
                 view.showMainPage(this, model.file != null ? model.file.getName():"No se ha seleccionado ningun archivo");
                 break;
@@ -675,6 +655,7 @@ public class Controller implements ActionListener {
                     }
                 }
                 if (isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
+                    if(c ==':') component.append(c);
                     characterCounter++;
                     if(component.isEmpty()) continue;
                     break;

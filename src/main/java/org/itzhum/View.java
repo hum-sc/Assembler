@@ -6,23 +6,33 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.security.MessageDigest;
-import java.util.Scanner;
+
 
 public class View extends JFrame {
 
-    static int height = 480;
-    static int width = 920;
+    private JSplitPane verticalSplit;
+    private JSplitPane northSplit;
+    private JSplitPane southSplit;
     public View (){
         super();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setName("Ensamblador");
-        setSize(width, height);
+        setMinimumSize(new Dimension(760,480));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         this.setVisible(true);
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                onResize(e);
+                super.componentResized(e);
+            }
+        });
     }
 
     public void showMainPage(ActionListener listener, String fileName){
@@ -108,7 +118,7 @@ public class View extends JFrame {
 
     }
 
-    public void showAssembledPage(ActionListener listener, String leftContent, String rightContent){
+    public void showAssembledPage(ActionListener listener, String code, String[] componentList, String errors, int[] errorLines, Object[][] symbolDataTable){
         JPanel header;
         JButton first;
         JLabel title;
@@ -121,6 +131,8 @@ public class View extends JFrame {
 
         Container container = this.getContentPane();
         container.removeAll();
+
+        System.out.println(this.getHeight()+","+this.getWidth());
         // Aquí ponemos el titulo
         title = new JLabel("Ensamblador");
 
@@ -156,32 +168,40 @@ public class View extends JFrame {
         headerLayout.putConstraint(SpringLayout.VERTICAL_CENTER, title, 0, SpringLayout.VERTICAL_CENTER, header);
         headerLayout.putConstraint(SpringLayout.VERTICAL_CENTER, first, 0, SpringLayout.VERTICAL_CENTER, header);
 
-
         container.add(header, BorderLayout.NORTH);
-
         //Parte central de la pantalla
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        DataPanel dataPanel = new DataPanel(leftContent, splitPane);
-        splitPane.setLeftComponent(dataPanel);
+        verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
+        northSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        DataPanel dataPanell = new DataPanel(rightContent, splitPane);
-        splitPane.setRightComponent(dataPanell);
+        CodePanel codePanel = new CodePanel(code);
+        codePanel.setErrorLines(errorLines);
+        ComponentPanel componentPanel = new ComponentPanel(componentList);
+        DataPanel errorPanel = new DataPanel(errors, northSplit);
 
+        TablePanel tablePanel = new TablePanel(symbolDataTable, new Object[]{"Simbolo","Tipo", "Valor", "Tama\u00f1o", "Direccion"});
 
+        northSplit.setLeftComponent(codePanel);
+        northSplit.setRightComponent(componentPanel);
 
-        splitPane.setDividerLocation(460);
-        splitPane.setEnabled(true);
+        southSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        container.add(splitPane, BorderLayout.CENTER);
+        southSplit.setLeftComponent(errorPanel);
+        southSplit.setRightComponent(tablePanel);
+
+        northSplit.setDividerLocation((getWidth()/3)*2);
+        southSplit.setDividerLocation((getWidth()/3)*2);
+
+        verticalSplit.add(northSplit);
+        verticalSplit.add(southSplit);
+
+        verticalSplit.setDividerLocation((getHeight()/5)*3);
+
+        container.add(verticalSplit, BorderLayout.CENTER);
 
 
         updateUI(container);
-
-
-
-
     }
 
     public File getFile() throws FileNotFoundException, ProcessCanceledException, Exception{
@@ -210,5 +230,13 @@ public class View extends JFrame {
     public void updateUI(Container container) {
         container.validate();
         container.repaint();
+    }
+
+    public void onResize(ComponentEvent e){
+        Dimension size = e.getComponent().getSize();
+        System.out.println(size.width+","+size.height);
+        verticalSplit.setDividerLocation((getHeight()/5)*3);
+        northSplit.setDividerLocation((getWidth()/3)*2);
+        southSplit.setDividerLocation((getWidth()/3)*2);
     }
 }

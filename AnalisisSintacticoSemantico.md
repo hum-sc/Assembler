@@ -67,7 +67,17 @@ De aquí encontramos que se encuentran 3 partes
 
 ## definicion del segmento de código
 Aquí nos cerramos a pocas instrucciones, estas se encuentran en [archivo de configuración de instrucciones](src/main/settings/instructions.cfg)
-Para analizar estas instrucciones podemos ver que tendremos los siguientes instrucciones
+Para analizar estas instrucciones podemos ver que tendremos distintos tipos de instrucciones, estos son:
+- saltos
+- aritmeticas
+- transferencia de control
+- transferencia de datos
+- saltos condicionales
+- Instrucciones logicas
+- Instrucciones de control de bandera
+- Instrucciones de interrupcion
+
+estas a su vez pueden invocarse:
 
 ### Sin operandos
 
@@ -81,10 +91,20 @@ Estas instrucciones podran tener un operando de tipo
 Estas instrucciones podran tener una de las siguientes
 - registro, memoria
 - registro, registro
-- registro, constante
+- registro, inmediato
 - memoria, registro
-- memoria, constante
+- memoria, inmediato
 - memoria, memoria
+
+## Tamaño de los operandos
+- byte
+- word
+
+y en combinacion
+- byte, byte
+- word, byte
+- word, word
+
 
 # Análisis de la sintáxis
 
@@ -96,14 +116,21 @@ nombre,
 sin operando, 
 un operando, 
 dos operandos, 
-constante, 
+inmediate, 
 memoria, 
 etiqueta, 
 registro, 
-registro-memoria, 
-registro-registro, 
-memoria-registro,
-registro-constante
+registro memoria, 
+registro registro, 
+registro inmediato
+memoria registro,
+memoria inmediato,
+memoria memoria,
+byte un operando,
+word un operando,
+byte byte,
+word byte,
+word word
 ```
 Ejemplo para la instruccion `mov`
 ```json 

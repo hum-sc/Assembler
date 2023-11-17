@@ -8,9 +8,13 @@ import java.io.Console;
 
 public class DataPanel extends JPanel implements ActionListener {
     public JScrollPane scrollPane;
-    JTextArea textArea;
+    JTextPane textArea;
     public DataPanel(String content, JSplitPane parent){
         super();
+
+        this.setBorder(BorderFactory.createLineBorder(Color.orange));
+        this.setLayout(new BorderLayout());
+
         JToolBar navigationBar = new JToolBar();
         JButton next = new JButton("Siguiente");
         next.setActionCommand("next");
@@ -20,19 +24,23 @@ public class DataPanel extends JPanel implements ActionListener {
         previous.addActionListener(this);
         navigationBar.add(previous);
         navigationBar.add(next);
-
-        textArea = new JTextArea(20,460/14);
-        textArea.setEditable(false);
-        textArea.setLineWrap(false);
-        textArea.setText(content);
-        scrollPane = new JScrollPane(textArea);
         add(navigationBar, BorderLayout.SOUTH);
-        add(scrollPane, BorderLayout.CENTER);
-        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        parent.add(this);
+        textArea = new JTextPane();
+        textArea.setEditable(false);
+        textArea.setContentType("text/plain");
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        textArea.setText(content);
+        textArea.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()-navigationBar.getHeight()));
+
+        scrollPane = new JScrollPane(textArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setMaximumSize(new Dimension(this.getWidth(), this.getHeight()-navigationBar.getHeight()));
+
+        add(scrollPane, BorderLayout.CENTER);
+
+        textArea.setCaretPosition(0);
 
     }
 
