@@ -112,25 +112,25 @@ Iniciamos por lo más sencillo, las instrucciones, aprovechado el [archivo de co
 podemos utilizar esto para definir ciertas cosas que requerimos para el análisis sintáctico y semántico.
 Cada linea de dicho archivo será separada por `,` y tendrá la siguiente estructura
 ```json
-nombre,
-sin operando, 
-un operando, 
-dos operandos, 
-inmediate, 
-memoria, 
-etiqueta, 
-registro, 
-registro memoria, 
-registro registro, 
-registro inmediato
-memoria registro,
-memoria inmediato,
-memoria memoria,
-byte un operando,
-word un operando,
-byte byte,
-word byte,
-word word
+0.nombre,
+1.sin operando, 
+2.un operando, 
+3.dos operandos, 
+4.inmediate, 
+5.memoria, 
+6.etiqueta, 
+7.registro, 
+8.registro memoria, 
+9.registro registro, 
+10.registro inmediato
+11.memoria registro,
+12.memoria inmediato,
+13.memoria memoria,
+14.byte un operando,
+15.word un operando,
+16.byte byte,
+17.word byte,
+18.word word
 ```
 Ejemplo para la instruccion `mov`
 ```json 

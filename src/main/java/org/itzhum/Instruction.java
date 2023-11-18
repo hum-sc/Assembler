@@ -29,15 +29,17 @@ public class Instruction {
     }
 
     public void addOperandAccepted(OperandType operand){
+        OperandType lOperand = operand;
         if(acceptByte){
-            if(operand == OperandType.MEMORY) operand = OperandType.MEMORYBYTE;
-            if(operand == OperandType.REGISTER) operand = OperandType.REGISTERBYTE;
-            OperandAccepted.add(operand);
+            if(operand == OperandType.MEMORY) lOperand = OperandType.MEMORYBYTE;
+            if(operand == OperandType.REGISTER) lOperand = OperandType.REGISTERBYTE;
+            OperandAccepted.add(lOperand);
         }
         if(acceptWord){
-            if(operand == OperandType.MEMORY) operand = OperandType.MEMORYWORD;
-            if(operand == OperandType.REGISTER) operand = OperandType.REGISTERWORD;
-            OperandAccepted.add(operand);
+            if(operand == OperandType.MEMORY) lOperand = OperandType.MEMORYWORD;
+            if(operand == OperandType.REGISTER) lOperand = OperandType.REGISTERWORD;
+
+            OperandAccepted.add(lOperand);
         }
 
         if(!acceptWord && !acceptByte)OperandAccepted.add(operand);

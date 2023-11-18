@@ -186,15 +186,16 @@ public class View extends JFrame {
         northSplit.setRightComponent(componentPanel);
 
         southSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-
+/*
         southSplit.setLeftComponent(errorPanel);
         southSplit.setRightComponent(tablePanel);
-
-        northSplit.setDividerLocation((getWidth()/3)*2);
         southSplit.setDividerLocation((getWidth()/3)*2);
+        verticalSplit.add(southSplit);
+*/
+        northSplit.setDividerLocation((getWidth()/3)*2);
 
         verticalSplit.add(northSplit);
-        verticalSplit.add(southSplit);
+        verticalSplit.add(tablePanel);
 
         verticalSplit.setDividerLocation((getHeight()/5)*3);
 

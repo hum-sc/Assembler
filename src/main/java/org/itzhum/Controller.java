@@ -8,6 +8,7 @@ import org.itzhum.types.SymbolType;
 import javax.naming.CompositeName;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ public class Controller implements ActionListener {
     public boolean isPseudoInstruction(String line){
         boolean isPseudo = model.pseudoInstructions.containsKey(line.toUpperCase());
         if(!isPseudo) isPseudo = line.startsWith("DUP(")&& line.endsWith(")");
+        if(!isPseudo) isPseudo = line.startsWith("BYTE PTR ");
+        if(!isPseudo) isPseudo = line.startsWith("WORD PTR ");
         return isPseudo;
     }
     public boolean isRegistersComplete (String line){return model.registersComplete.containsKey(line.toUpperCase());}
@@ -233,6 +236,18 @@ public class Controller implements ActionListener {
                 }
                 else return OperandType.INVALID;
             }
+            case PseudoInstruccion -> {
+                if(component.startsWith("BYTE PTR ")){
+                    component = component.substring(9);
+                    //TODO: IDENTIFICAR QUE ES.
+                    return OperandType.MEMORYBYTE;
+                }
+                else if(component.endsWith("WORD PTR ")){
+                    //TODO: IDENTIFICAR QUE ES.
+                    return OperandType.MEMORYWORD;
+                }
+                else return OperandType.INVALID;
+            }
             default -> {
                 return OperandType.INVALID;
             }
@@ -244,14 +259,14 @@ public class Controller implements ActionListener {
         String line = model.getNextLine(), component = "";
 
         int lineCoutner = 0;
-        int counterProgram = 0;
+        int counterProgram = 800;
 
         boolean inStackSegment = false;
         boolean inDataSegment = false;
         boolean inCodeSegment = false;
 
         while (line != null ) {
-
+            component = "";
             if (!line.isEmpty() && !line.isBlank() && !isComment(line)) try{
                 if(isPseudoInstruction(line)){
                     model.addComponent(line, ComponentType.PseudoInstruccion);
@@ -269,17 +284,19 @@ public class Controller implements ActionListener {
                     else if(!inStackSegment && !inDataSegment && !inCodeSegment){
                             if (line.equals(".STACK SEGMENT")){
                                 inStackSegment = true;
+                                counterProgram = 0;
                             }
                             if (line.equals(".DATA SEGMENT")){
                                 inDataSegment = true;
+                                counterProgram = 0;
                             }
                             if(line.equals(".CODE SEGMENT")){
                                 inCodeSegment = true;
+                                counterProgram = 0;
 
                             }
                             line = model.getNextLine();
                             lineCoutner++;
-                            counterProgram = 0;
                             continue;
                         }
 
@@ -331,7 +348,7 @@ public class Controller implements ActionListener {
                     if(!line.isEmpty() && !isComment(line)){
                         throw new Exception("Se esperaba el fin de la linea");
                     }
-                    counterProgram += list.size()*16;
+                    counterProgram += list.size()*2;
                 }
                 if (inDataSegment){
                     String[] result;
@@ -358,7 +375,7 @@ public class Controller implements ActionListener {
                                 int number = componentToNumber(component);
                                 if (line.isEmpty() || isComment(line)) {
                                     model.addSymbol(symbol, SymbolType.Variable, number, SizeType.Byte, counterProgram);
-                                    counterProgram += 8;
+                                    counterProgram += 1;
                                 } else {
                                     result = getNextComponent(line);
                                     line = result[1];
@@ -373,7 +390,7 @@ public class Controller implements ActionListener {
 
                                     model.addSymbol(symbol, SymbolType.Variable, list, SizeType.Byte, counterProgram);
 
-                                    counterProgram += isArrayString(list) ? 8*(list.get(0).toString().length()-2)*list.size() : 8*list.size();
+                                    counterProgram += isArrayString(list) ? (list.get(0).toString().length()-2)*list.size() : list.size();
 
                                 }
                             } else if (isWordNumberConstant(component)) {
@@ -392,12 +409,12 @@ public class Controller implements ActionListener {
                                 if (!line.isEmpty() || !isComment(line)) {
                                     throw new Exception("Se esperaba el fin de la linea");
                                 }
-                                counterProgram += isArrayString(list) ? 8*(list.get(0).toString().length()-2)*list.size() : 8*list.size();
+                                counterProgram += isArrayString(list) ? (list.get(0).toString().length()-2)*list.size() : list.size();
                             } else if (isCaracterConstant(component)) {
                                 if (line.isEmpty() || isComment(line)) {
                                     model.addComponent(component, ComponentType.CaracterConstante);
                                     model.addSymbol(symbol, SymbolType.Variable, component.substring(1,component.length()-1), SizeType.Byte, counterProgram);
-                                    counterProgram += 8 * (component.length() - 2);
+                                    counterProgram += (component.length() - 2);
                                 } else throw new Exception("Se esperaba el fin de la linea");
                             } else throw new Exception("Se esperaba una constante númerica, un arreglo o caracter");
                         }
@@ -431,7 +448,7 @@ public class Controller implements ActionListener {
                                         throw new Exception("Se esperaba el fin de la linea");
                                     }
                                     model.addSymbol(symbol, SymbolType.Variable, list, SizeType.Word, counterProgram);
-                                    counterProgram += 16*list.size();
+                                    counterProgram += 2*list.size();
                                 }
                             }
                             else throw new Exception("Se esperaba una constante numerica");
@@ -446,7 +463,7 @@ public class Controller implements ActionListener {
                             if (isWordNumberConstant(component)) {
                                 model.addComponent(component, identifyComponent(component));
                                 model.addSymbol(symbol, SymbolType.Constante, componentToNumber(component), SizeType.Word, counterProgram);
-                                counterProgram += 16;
+                                counterProgram += 2;
                             } else throw new Exception("Se esperaba una constante numerica");
 
                         }
@@ -462,36 +479,48 @@ public class Controller implements ActionListener {
                     if(isInstruction(component)){
                         model.addComponent(component, ComponentType.Instruccion);
                         Instruction instruction = model.getInstruction(component);
+                        System.out.println(component+" "+line);
                         if(line.isEmpty() || isComment(line)){
                             boolean isSintaxCorrect = instruction.checkSintax();
                             if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"sin operandos");
                             //TODO: Aumentar el CP
-                            counterProgram+=8;
+                            counterProgram+=1;
 
                         } else{
-                            result = getNextComponent(line);
+                            //Primer operando
+                            result = getNextOperand(line);
                             line = result[1];
                             component = result[0];
+                            System.out.println(component);
                             OperandType type = identifyOperand(component);
-                            if(type == OperandType.INVALID) throw new Exception("Se esperaba un operando valido");
+                            if(type == OperandType.INVALID){
+                                //addRestOFLine(component);
+                                throw new Exception("Se esperaba un operando valido");
+                            }
+
                             if(line.isEmpty()|| isComment(line)){
                                 boolean isSintaxCorrect = instruction.checkSintax(type);
                                 if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString());
                                 model.addComponent(component, identifyComponent(component));
                                 //TODO: Aumentar el CP
-                                counterProgram+=16;
+                                counterProgram+=2;
                             } else{
                                 model.addComponent(component, identifyComponent(component));
-                                result = getNextComponent(line);
+                                result = getNextOperand(line);
                                 line = result[1];
                                 component = result[0];
 
+                                System.out.println(component+" "+line);
+
                                 OperandType type2 = identifyOperand(component);
-                                if(type2 == OperandType.INVALID) throw new Exception("Se esperaba un operando valido");
+                                if(type2 == OperandType.INVALID) {
+                                    throw new Exception("Se esperaba un operando valido");
+                                }
                                 boolean isSintaxCorrect = instruction.checkSintax(type, type2);
                                 if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString()+" y "+type2.toString());
                                 model.addComponent(component, identifyComponent(component));
-                                counterProgram+=16;
+                                //TODO: Aumentar el CP
+                                counterProgram+=2;
                             }
                         }
                     } else if(isTag(component)){
@@ -512,7 +541,8 @@ public class Controller implements ActionListener {
                 model.setError(lineCoutner, e.getMessage());
                 boolean isCausedByCaracterConstant = e.getCause() != null && e.getCause().getMessage().equals(ComponentType.CaracterConstante.toString());
                 if(!component.isEmpty() && !isCausedByCaracterConstant){
-                    model.addComponent(component, identifyComponent(component));
+                    addRestOFLine(component);
+                    //model.addComponent(component, identifyComponent(component));
                 }
                 if(!line.isEmpty()){
                     addRestOFLine(line);
@@ -523,6 +553,8 @@ public class Controller implements ActionListener {
         }
 
     }
+
+
 
     private static boolean isArrayString(ArrayList lista) {
         return lista.get(0).getClass().equals(String.class);
@@ -673,6 +705,82 @@ public class Controller implements ActionListener {
         return new String[]{"",""};
     }
 
+    private String[] getNextOperand(String line) throws Exception {
+        boolean possibleCommentDoubleQuote;
+        boolean possibleCommentSingleQuote;
+        boolean isCompounded;
+        int characterCounter = 0;
+        possibleCommentDoubleQuote = false;
+        possibleCommentSingleQuote = false;
+        isCompounded = false;
+        StringBuilder component = new StringBuilder();
+
+        if(line.isEmpty() || line.isBlank()) return new String[]{"", ""};
+        for(char c: line.toCharArray()) {
+            if (c == ';') break;
+
+            if ((component.toString().equals("DUP(") || component.toString().equals("[")) && !isCompounded) {
+                isCompounded = true;
+            }
+            if ((c == ')' || c == ']') && isCompounded) {
+                isCompounded = false;
+            }
+
+            if (!isCompounded) {
+                if (c == '"' && !possibleCommentSingleQuote) {
+                    //if (!possibleCommentDoubleQuote && (!component.isEmpty())) break;
+
+                    possibleCommentDoubleQuote = !possibleCommentDoubleQuote;
+
+                    if (!possibleCommentDoubleQuote) {
+                        component.append(c);
+                        characterCounter++;
+                        break;
+                    }
+                }
+
+                if (c == '\'' && !possibleCommentDoubleQuote) {
+                    //if (!possibleCommentSingleQuote && (!component.isEmpty()))break;
 
 
+                    possibleCommentSingleQuote = !possibleCommentSingleQuote;
+                    if (!possibleCommentSingleQuote) {
+                        component.append(c);
+                        characterCounter++;
+                        break;
+                    }
+                }
+                if (isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
+                    //characterCounter++;
+                    if(component.isEmpty() && c != ','){
+                        characterCounter++;
+                        continue;
+                    }
+                    if (c == ','){
+                        characterCounter++;
+                        break;
+                    }
+                }
+            }
+            component.append(c);
+            characterCounter ++;
+        }
+
+        for(char c: component.toString().toCharArray()){
+            if(c == ' ') component.deleteCharAt(0);
+            else break;
+        }
+
+        for(int i = component.length()-1; i >= 0; i--){
+            if(component.charAt(i) == ' ') component.deleteCharAt(i);
+            else break;
+        }
+
+        if((!component.isEmpty()) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote && !isCompounded){
+            return new String[]{component.toString(),line.substring(characterCounter)};
+        } else if (possibleCommentDoubleQuote || possibleCommentSingleQuote || isCompounded){
+            throw new Exception("Falta el simbolo de cerrado", new Throwable(ComponentType.CaracterConstante.toString()));
+        }
+        return new String[]{"",""};
+    }
 }

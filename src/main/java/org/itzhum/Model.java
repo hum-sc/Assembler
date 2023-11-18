@@ -182,7 +182,7 @@ public class Model {
             while (scanner.hasNextLine()){
                fileString = fileString.concat(getNextLine());
                if(errors.containsKey(lineNumber)){
-                   //fileString = fileString.concat(" Error: "+errors.get(lineNumber));
+                   fileString = fileString.concat(" Error: "+errors.get(lineNumber));
                }
                 fileString = fileString.concat("\n");
                lineNumber++;
@@ -275,7 +275,7 @@ public class Model {
             data[i][1] = symbol.getType();
             data[i][2] = symbol.getValue();
             data[i][3] = symbol.getSize();
-            data[i][4] = "0"+Integer.toHexString(symbol.getDirection())+"H";
+            data[i][4] = "";//"0"+Integer.toHexString(symbol.getDirection())+"H";
             i++;
         }
         return data;
