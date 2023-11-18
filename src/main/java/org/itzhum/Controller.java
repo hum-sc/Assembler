@@ -477,17 +477,18 @@ public class Controller implements ActionListener {
                     component = result[0];
 
                     if(isInstruction(component)){
-                        model.addComponent(component, ComponentType.Instruccion);
                         Instruction instruction = model.getInstruction(component);
                         System.out.println(component+" "+line);
                         if(line.isEmpty() || isComment(line)){
                             boolean isSintaxCorrect = instruction.checkSintax();
                             if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"sin operandos");
+                            model.addComponent(component, ComponentType.Instruccion);
                             //TODO: Aumentar el CP
                             counterProgram+=1;
 
                         } else{
                             //Primer operando
+                            model.addComponent(component, ComponentType.Instruccion);
                             result = getNextOperand(line);
                             line = result[1];
                             component = result[0];
