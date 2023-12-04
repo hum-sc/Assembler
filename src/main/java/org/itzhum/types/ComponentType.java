@@ -16,7 +16,8 @@ public enum ComponentType {
     ConstanteHexadecimalWord,
     ConstanteBinariaWord,
     Simbolo,
-    Desconocido;
+    Desconocido,
+    RegistroSegmento, Memoria;
 
     public Type getJavaType(){
         return switch (this) {
@@ -63,17 +64,20 @@ public enum ComponentType {
             case RegistroCompleto -> {
                 return "Registro Completo";
             }
+            case RegistroSegmento -> {
+                return "Registro de segmento";
+            }
             case Etiqueta -> {
                 return "Etiqueta";
-            }
-case Desconocido -> {
-                return "Desconocido";
             }
             case Instruccion -> {
                 return "Instruccion";
             }
             case PseudoInstruccion -> {
                 return "Pseudo-Instruccion";
+            }
+            case Memoria -> {
+                return "Memoria";
             }
             default -> {
                 return "Desconocido";

@@ -1,4 +1,4 @@
-package org.itzhum;
+package org.itzhum.view;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
@@ -18,13 +18,16 @@ import java.util.Set;
 class LineNumbersView extends JComponent implements DocumentListener, CaretListener, ComponentListener {
 
     private static final long serialVersionUID = 1L;
-    private static final int MARGIN_WIDTH_PX = 32;
+    private static int MARGIN_WIDTH_PX = 54;
+    private String[] numbersAdded;
 
     private JTextComponent editor;
 
     private Set<Integer> errors;
 
     private Font font;
+
+    private String[] numbers;
 
     public LineNumbersView(JTextComponent editor) {
         this.editor = editor;
@@ -33,7 +36,31 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
         editor.getDocument().addDocumentListener(this);
         editor.addComponentListener(this);
         editor.addCaretListener(this);
+    }
+    public LineNumbersView(JTextComponent editor, String[] numbers) {
+        this.editor = editor;
+        this.errors = new HashSet<Integer>();
 
+        editor.getDocument().addDocumentListener(this);
+        editor.addComponentListener(this);
+        editor.addCaretListener(this);
+
+
+
+        this.numbers = numbers;
+
+    }
+
+    public LineNumbersView(JTextPane editor, String[] numbers, String[] numbersAdded) {
+        this.editor = editor;
+        this.errors = new HashSet<Integer>();
+
+        editor.getDocument().addDocumentListener(this);
+        editor.addComponentListener(this);
+        editor.addCaretListener(this);
+        MARGIN_WIDTH_PX = 130;
+        this.numbers = numbers;
+        this.numbersAdded = numbersAdded;
     }
 
     public void setErrors(int[] lineErrors){
@@ -84,6 +111,15 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
         int index = root.getElementIndex(offset);
         Element line = root.getElement(index);
 
+        if(numbers != null){
+            if(numbersAdded != null){
+                if(numbersAdded[index] == null) return line.getStartOffset() == offset ? numbers[index]:null;
+                return line.getStartOffset() == offset ? numbers[index] +" "+ numbersAdded[index]:null;
+            }
+            return line.getStartOffset() == offset ? numbers[index]:null;
+        }
+
+
         return line.getStartOffset() == offset ? String.format("%3d", index + 1) : null;
     }
 
@@ -108,8 +144,6 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
     private boolean hasError(int offset) {
         int caretPosition = editor.getCaretPosition();
         Element root = editor.getDocument().getDefaultRootElement();
-
-        System.out.println(root.getElementIndex(caretPosition)+" "+errors.contains(root.getElementIndex(caretPosition)));
         return errors.contains(root.getElementIndex(caretPosition));
     }
 

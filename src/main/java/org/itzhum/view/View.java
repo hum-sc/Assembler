@@ -1,9 +1,8 @@
-package org.itzhum;
+package org.itzhum.view;
 
 import org.itzhum.exceptions.ProcessCanceledException;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -118,7 +117,7 @@ public class View extends JFrame {
 
     }
 
-    public void showAssembledPage(ActionListener listener, String code, String[] componentList, String errors, int[] errorLines, Object[][] symbolDataTable){
+    public void showAssembledPage(ActionListener listener, String code, String[] componentList, String errors, int[] errorLines, Object[][] symbolDataTable, String[]counterProgram, String[] machineCode ){
         JPanel header;
         JButton first;
         JLabel title;
@@ -132,7 +131,7 @@ public class View extends JFrame {
         Container container = this.getContentPane();
         container.removeAll();
 
-        System.out.println(this.getHeight()+","+this.getWidth());
+        //System.out.println(this.getHeight()+","+this.getWidth());
         // Aquí ponemos el titulo
         title = new JLabel("Ensamblador");
 
@@ -175,7 +174,7 @@ public class View extends JFrame {
 
         northSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        CodePanel codePanel = new CodePanel(code);
+        CodePanel codePanel = new CodePanel(code, counterProgram, machineCode);
         codePanel.setErrorLines(errorLines);
         ComponentPanel componentPanel = new ComponentPanel(componentList);
         DataPanel errorPanel = new DataPanel(errors, northSplit);
@@ -235,9 +234,8 @@ public class View extends JFrame {
 
     public void onResize(ComponentEvent e){
         Dimension size = e.getComponent().getSize();
-        System.out.println(size.width+","+size.height);
-        verticalSplit.setDividerLocation((getHeight()/5)*3);
-        northSplit.setDividerLocation((getWidth()/3)*2);
-        southSplit.setDividerLocation((getWidth()/3)*2);
+        if(verticalSplit != null)verticalSplit.setDividerLocation((getHeight()/5)*3);
+        if(northSplit != null) northSplit.setDividerLocation((getWidth()/3)*2);
+        if(southSplit !=null) southSplit.setDividerLocation((getWidth()/3)*2);
     }
 }

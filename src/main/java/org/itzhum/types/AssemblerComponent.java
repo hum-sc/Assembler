@@ -1,4 +1,4 @@
-package org.itzhum;
+package org.itzhum.types;
 
 import org.itzhum.types.ComponentType;
 

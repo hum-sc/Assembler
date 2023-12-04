@@ -111,28 +111,82 @@ y en combinacion
 Iniciamos por lo más sencillo, las instrucciones, aprovechado el [archivo de configuración de instrucciones](src/main/settings/instructions.cfg)
 podemos utilizar esto para definir ciertas cosas que requerimos para el análisis sintáctico y semántico.
 Cada linea de dicho archivo será separada por `,` y tendrá la siguiente estructura
-```json
-0.nombre,
-1.sin operando, 
-2.un operando, 
-3.dos operandos, 
-4.inmediate, 
-5.memoria, 
-6.etiqueta, 
-7.registro, 
-8.registro memoria, 
-9.registro registro, 
-10.registro inmediato
-11.memoria registro,
-12.memoria inmediato,
-13.memoria memoria,
-14.byte un operando,
-15.word un operando,
-16.byte byte,
-17.word byte,
-18.word word
-```
-Ejemplo para la instruccion `mov`
-```json 
-mov,0,0,1,0,0,0,0,1,1,1
-```
+
+0. nombre,
+1. sin operando, 
+2. un operando, 
+3. dos operandos, 
+4. inmediate, 
+5. memoria, 
+6. etiqueta, 
+7. registro,
+8. regs
+9. registro memoria, 
+10. registro registro, 
+11. registro inmediato
+12. memoria registro,
+13. memoria inmediato,
+14. memoria memoria,
+15. regs reg
+16. reg regs
+17. byte un operando,
+18. word un operando,
+19. byte byte,
+20. word byte,
+21. word word,
+
+# Codificación
+Aquí se agregan la configuración ára la codificación de las instrucciones, aquí ya no es solo 1's y 0's
+22. codigo sin operandos
+23. codigo operando inmediato
+24. codigo operando memoria
+25. codigo operando etiqueta
+26. codigo operando registro
+27. codigo operando regs
+28. Direccionamiento inmmediato
+29. direcconamiento memoria
+30. direccionamiento etiqueta
+31. direccionamiento registro
+32. direccionamiento regs
+33. desplazamiento inmediato
+34. desplazamiento	etiq
+35. desplazamiento reg
+36. desplazamiento regs
+37. inmediato inm
+38. inmediato mem
+39. inmediato etiq
+40. inmediato reg
+41. inmediato regs
+42. codigo regmem
+43. codigo regreg
+44. codigo reginm
+45. codigo memreg
+46. codigo meminm
+47. codigo memmem
+48. codigo regs,reg
+49. codigo reg,regs
+50. direccionamiento regmem
+51. direccionamiento regreg
+52. direccionamiento reginm
+53. direccionamiento memreg
+54. direccionamiento meminm
+55. direccionamiento memmem	
+56. direccionamiento regs,reg
+57. direccionamiento reg,regs
+58. desplazamiento regmem
+59. desplazamiento regreg
+60. desplazamiento reginm
+61. desplazamiento memreg
+62. desplazamiento meminm
+63. desplazamiento memmem
+64. desplazamiento regsreg
+65. desplazamiento regregs
+66. inmediato regmem
+67. inmediato regreg
+68. inmediato reginm
+69. inmediato memreg
+70. inmediato meminm
+71. inmediato memmem
+72. inmediato regsreg
+73. inmediato regregs
+

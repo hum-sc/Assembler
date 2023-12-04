@@ -1,8 +1,5 @@
 package org.itzhum;
-import javax.swing.*;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import org.itzhum.view.View;
 
 
 public class Main {

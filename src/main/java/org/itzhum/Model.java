@@ -1,29 +1,33 @@
 package org.itzhum;
 
-import org.itzhum.types.ComponentType;
-import org.itzhum.types.OperandType;
-import org.itzhum.types.SizeType;
-import org.itzhum.types.SymbolType;
+import org.itzhum.logic.Identifier;
+import org.itzhum.logic.Instruction;
+import org.itzhum.types.*;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.*;
 
 public class Model {
     public File file;
     private int numberOfLines;
     public Scanner scanner;
-    public HashMap<String, Instruction> instructions;
+    public final HashMap<String, Instruction> instructions;
 
-    public HashMap<String, String> pseudoInstructions;
-    public HashMap<String, String> registersComplete;
-    public  HashMap<String, String> registersHalf;
-    public HashMap<String, String> labels;
+    public final HashMap<String, String> pseudoInstructions;
+    public final HashMap<String, String> registersComplete;
+    public final HashMap<String, String> registersHalf;
+    public final HashMap<String, String> segmentRegister;
 
-    public LinkedHashMap<String,Symbol> symbols;
+    public final LinkedHashMap<String, Symbol> symbols;
 
-    public List<AssemblerComponent> components;
+    public final List<AssemblerComponent> components;
 
-    public HashMap<Integer, String> errors;
+    public final HashMap<Integer, String> errors;
+
+    private String[] counterProgram;
+    private String[] hexMachineCode;
+    private String[] binMachineCode;
     private int maxLineLength = 0;
 
     public Model() {
@@ -31,6 +35,8 @@ public class Model {
         instructions = new HashMap<>();
         registersComplete = new HashMap<>();
         registersHalf = new HashMap<>();
+        segmentRegister = new HashMap<>();
+
         components = new ArrayList<>();
         errors = new HashMap<>();
 
@@ -58,47 +64,85 @@ public class Model {
                 boolean isNoOperands = parts[1].equals("1");
                 boolean isOneOperand = parts[2].equals("1");
                 boolean isTwoOperands = parts[3].equals("1");
-                boolean isByte = parts[14].equals("1");
-                boolean isWord = parts[15].equals("1");
-                boolean isByteByte = parts[16].equals("1");
-                boolean isWordByte = parts[17].equals("1");
-                boolean isWordWord = parts[18].equals("1");
+                boolean isByte = parts[17].equals("1");
+                boolean isWord = parts[18].equals("1");
+                boolean isByteByte = parts[19].equals("1");
+                boolean isWordByte = parts[20].equals("1");
+                boolean isWordWord = parts[21].equals("1");
+
                 Instruction instruction = new Instruction(parts[0].toUpperCase(),isNoOperands,isOneOperand,isTwoOperands, isByte, isWord, isByteByte, isWordByte, isWordWord);
+                Code lcode;
+                if(isNoOperands){
+                    instruction.addCode(parts[22]);
+                }
                 if(isOneOperand){
                     if(parts[4].equals("1")){
-                        instruction.addOperandAccepted(OperandType.INMEDIATE);
+                        lcode =  new Code(parts[23],parts[28],parts[33], parts[38]);
+                        instruction.addOperandAccepted(OperandType.INMEDIATE, lcode);
                     }
                     if(parts[5].equals("1")){
-                        instruction.addOperandAccepted(OperandType.MEMORY);
+                        lcode = new Code(parts[24],parts[29],parts[34], parts[39]);
+                        instruction.addOperandAccepted(OperandType.MEMORY, lcode);
+
                     }
                     if(parts[6].equals("1")){
-                        instruction.addOperandAccepted(OperandType.TAG);
+
+                        lcode = new Code(parts[25],parts[30],parts[35], parts[40]);
+                        instruction.addOperandAccepted(OperandType.TAG, lcode);
                     }
                     if(parts[7].equals("1")){
-                        instruction.addOperandAccepted(OperandType.REGISTER);
+                        lcode = new Code(parts[26],parts[31],parts[36], parts[41]);
+                        instruction.addOperandAccepted(OperandType.REGISTER, lcode);
+                    }
+                    if(parts[8].equals("1")){
+                        lcode = new Code(parts[27],parts[32],parts[37], parts[42]);
+                        instruction.addOperandAccepted(OperandType.SEGMENTREGISTER, lcode);
                     }
                 }
-                if(isTwoOperands){
-                    if (parts[8].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.MEMORY);
+                //System.out.println(parts[0]+" "+isTwoOperands);
+                try {
+                    if (isTwoOperands) {
+                        System.out.println(parts[0]);
+                        if (parts[9].equals("1")) {
+                            lcode = new Code(parts[43], parts[51], parts[59], parts[67]);
+                            instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.MEMORY, lcode);
+                        }
+                        if (parts[10].equals("1")) {
+                            lcode = new Code(parts[44], parts[52], parts[60], parts[68]);
+                            instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.REGISTER, lcode);
+                        }
+                        if (parts[11].equals("1")) {
+                            lcode = new Code(parts[45], parts[53], parts[61], parts[69]);
+                            instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.INMEDIATE, lcode);
+                        }
+                        if (parts[12].equals("1")) {
+                            lcode = new Code(parts[46], parts[54], parts[62], parts[70]);
+                            instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.REGISTER, lcode);
+                        }
+                        if (parts[13].equals("1")) {
+                            lcode = new Code(parts[47], parts[55], parts[63], parts[71]);
+                            instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.INMEDIATE, lcode);
+                        }
+                        if (parts[14].equals("1")) {
+                            lcode = new Code(parts[48], parts[56], parts[64], parts[72]);
+                            instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.MEMORY, lcode);
+                        }
+                        if (parts[15].equals("1")) {
+                            lcode = new Code(parts[49], parts[57], parts[65], parts[73]);
+                            instruction.addPairOperandAccepted(OperandType.SEGMENTREGISTER, OperandType.REGISTER, lcode);
+                        }
+                        if (parts[16].equals("1")) {
+                            lcode = new Code(parts[50], parts[58], parts[66], parts[74]);
+                            instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.SEGMENTREGISTER, lcode);
+                        }
                     }
-                    if (parts[9].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.REGISTER);
-                    }
-                    if (parts[10].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.INMEDIATE);
-                    }
-                    if (parts[11].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.REGISTER);
-                    }
-                    if (parts[12].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.INMEDIATE);
-                    }
-                    if (parts[13].equals("1")){
-                        instruction.addPairOperandAccepted(OperandType.MEMORY, OperandType.MEMORY);
-                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println(parts[0]);
                 }
+
                 instructions.put(parts[0].toUpperCase(), instruction);
+                instruction.printCodes();
             }
 
             configFile = new File(pathBase+"\\src\\main\\settings\\registersComplete.cfg");
@@ -116,13 +160,18 @@ public class Model {
                 String[] parts = line.split(",");
                 registersHalf.put(parts[0].toUpperCase(), null);
             }
+            configFile = new File(pathBase+"\\src\\main\\settings\\regs.cfg");
+            scanner = new Scanner(configFile);
+            while (scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                segmentRegister.put(parts[0].toUpperCase(), null);
+            }
             
             
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.toString());
+            //TODO: handle exception
         }
-
 
 
     }
@@ -131,7 +180,15 @@ public class Model {
         this.file = file;
         try {
             this.scanner = new Scanner(file);
-
+            int counter = 0;
+            while (scanner.hasNext()){
+                counter++;
+               scanner.nextLine();
+            }
+            counterProgram = new String[counter+10];
+            hexMachineCode = new String[counter+10];
+            binMachineCode = new String[counter+10];
+            System.out.println(counterProgram.length);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -141,6 +198,10 @@ public class Model {
     public void addComponent(String component, ComponentType type){
         if (component.length() > maxLineLength) maxLineLength = component.length();
         components.add(new AssemblerComponent(component.replace("\t", ""), type));
+    }
+    public void setCounterProgram(int lineNumber, int counter){
+
+        counterProgram[lineNumber] ="0"+Integer.toHexString(counter).toUpperCase()+"H";
     }
     public void setError(Integer lineNumber, String error){
         errors.put(lineNumber, error);
@@ -182,7 +243,7 @@ public class Model {
             while (scanner.hasNextLine()){
                fileString = fileString.concat(getNextLine());
                if(errors.containsKey(lineNumber)){
-                   fileString = fileString.concat(" Error: "+errors.get(lineNumber));
+                   fileString = fileString.concat("\u001B[1;31m Error: "+errors.get(lineNumber)+"\u001b[0m");
                }
                 fileString = fileString.concat("\n");
                lineNumber++;
@@ -227,11 +288,8 @@ public class Model {
     public String[] getComponentList(){
         //TODO: Que todo quede alineado
         String[] list = {"",""};
-        String spaces = "";
-        int componentLength = 0;
+
         for (AssemblerComponent component: components) {
-            componentLength = component.name.length();
-            spaces = " ".repeat((maxLineLength - componentLength));
 
             list[0] = list[0].concat(component.name+"\n");
             list[1] = list[1].concat(component.type.toString()+"\n");
@@ -275,9 +333,129 @@ public class Model {
             data[i][1] = symbol.getType();
             data[i][2] = symbol.getValue();
             data[i][3] = symbol.getSize();
-            data[i][4] = "";//"0"+Integer.toHexString(symbol.getDirection())+"H";
+            data[i][4] =symbol.getDirection() != null ? "0"+Integer.toHexString(symbol.getDirection()).toUpperCase()+"H":"";
             i++;
         }
         return data;
+    }
+
+    public String[] getCounterProgram() {
+        return counterProgram;
+    }
+
+    public void addSymbol(String name, SymbolType type, int value, SizeType size) throws Exception {
+        if(findSymbol(name)){
+            throw new Exception("El simbolo "+name+" ya existe");
+        }
+        Symbol<Integer> symbol = new Symbol<>(name, type, value, size);
+
+        symbols.put(name,symbol);
+    }
+
+    String[] getNextOperand(String line) throws Exception {
+        boolean possibleCommentDoubleQuote;
+        boolean possibleCommentSingleQuote;
+        boolean isCompounded;
+        int characterCounter = 0;
+        possibleCommentDoubleQuote = false;
+        possibleCommentSingleQuote = false;
+        isCompounded = false;
+        StringBuilder component = new StringBuilder();
+
+        if(line.isEmpty() || line.isBlank()) return new String[]{"", ""};
+        for(char c: line.toCharArray()) {
+            if (c == ';') break;
+
+            if ((component.toString().equals("DUP(") || component.toString().equals("[")) && !isCompounded) {
+                isCompounded = true;
+            }
+            if ((c == ')' || c == ']') && isCompounded) {
+                isCompounded = false;
+            }
+
+            if (!isCompounded) {
+                if (c == '"' && !possibleCommentSingleQuote) {
+                    //if (!possibleCommentDoubleQuote && (!component.isEmpty())) break;
+
+                    possibleCommentDoubleQuote = !possibleCommentDoubleQuote;
+
+                    if (!possibleCommentDoubleQuote) {
+                        component.append(c);
+                        characterCounter++;
+                        break;
+                    }
+                }
+
+                if (c == '\'' && !possibleCommentDoubleQuote) {
+                    //if (!possibleCommentSingleQuote && (!component.isEmpty()))break;
+
+
+                    possibleCommentSingleQuote = !possibleCommentSingleQuote;
+                    if (!possibleCommentSingleQuote) {
+                        component.append(c);
+                        characterCounter++;
+                        break;
+                    }
+                }
+                if (Identifier.isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
+                    //characterCounter++;
+                    if(component.isEmpty() && c != ','){
+                        characterCounter++;
+                        continue;
+                    }
+                    if (c == ','){
+                        characterCounter++;
+                        break;
+                    }
+                }
+            }
+            component.append(c);
+            characterCounter ++;
+        }
+
+        for(char c: component.toString().toCharArray()){
+            if(c == ' ') component.deleteCharAt(0);
+            else break;
+        }
+
+        for(int i = component.length()-1; i >= 0; i--){
+            if(component.charAt(i) == ' ') component.deleteCharAt(i);
+            else break;
+        }
+
+        if((!component.isEmpty()) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote && !isCompounded){
+            return new String[]{component.toString(),line.substring(characterCounter)};
+        } else if (possibleCommentDoubleQuote || possibleCommentSingleQuote || isCompounded){
+            throw new Exception("Falta el simbolo de cerrado", new Throwable(ComponentType.CaracterConstante.toString()));
+        }
+        return new String[]{"",""};
+    }
+
+    public String[] getHexMachineCode() {
+        return hexMachineCode;
+    }
+
+    /**
+     *
+     * @param lineCoutner Linea en la que se encuentra el codigo
+     * @param encode Codigo en binario
+     */
+    public void addMachineCode(int lineCoutner, String encode) {
+        hexMachineCode[lineCoutner] = Integer.toHexString(Integer.parseUnsignedInt(encode, 2)).toUpperCase();
+        binMachineCode[lineCoutner] = encode;
+    }
+
+    public String[] getBinMachineCode() {
+        return binMachineCode;
+    }
+
+    public void clearData() {
+        components.clear();
+        errors.clear();
+        symbols.clear();
+        counterProgram = new String[numberOfLines+10];
+        hexMachineCode = new String[numberOfLines+10];
+        binMachineCode = new String[numberOfLines+10];
+        maxLineLength = 0;
     }
 }

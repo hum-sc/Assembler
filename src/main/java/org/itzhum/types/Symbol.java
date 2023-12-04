@@ -1,4 +1,4 @@
-package org.itzhum;
+package org.itzhum.types;
 
 import org.itzhum.types.SizeType;
 import org.itzhum.types.SymbolType;
@@ -11,7 +11,7 @@ public class Symbol<T> {
     private T value;
 
     private SizeType size;
-    private int direction;
+    private Integer direction;
 
     public Symbol(String name, SymbolType type, T value, SizeType size, int direction){
         this.name = name;
@@ -19,6 +19,15 @@ public class Symbol<T> {
         this.value = value;
         this.size = size;
         this.direction = direction;
+    }
+
+    public Symbol(String name, SymbolType type, T value, SizeType size){
+        this.name = name;
+        this.type = type;
+        this.value = value;
+        this.size = size;
+        direction = null;
+
     }
 
     public String getName() {
@@ -53,7 +62,7 @@ public class Symbol<T> {
         this.size = size;
     }
 
-    public int getDirection() {
+    public Integer getDirection() {
         return direction;
     }
 

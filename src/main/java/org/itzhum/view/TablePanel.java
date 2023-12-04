@@ -1,4 +1,4 @@
-package org.itzhum;
+package org.itzhum.view;
 
 import javax.swing.*;
 
