@@ -12,7 +12,6 @@ public class DataPanel extends JPanel implements ActionListener {
     public DataPanel(String content, JSplitPane parent){
         super();
 
-        this.setBorder(BorderFactory.createLineBorder(Color.orange));
         this.setLayout(new BorderLayout());
 
         JToolBar navigationBar = new JToolBar();

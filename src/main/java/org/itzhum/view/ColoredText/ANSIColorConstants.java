@@ -274,10 +274,9 @@ public final class ANSIColorConstants
      */
     public static boolean isBackgroundEscape(String ansiColor)
     {
-        return ansiColor.indexOf(ESCAPE_TEXT_END, 0) > 1 ?
-                Character.getNumericValue(
-                        ansiColor.charAt(ansiColor.indexOf(ESCAPE_TEXT_END, 0) - 2)) ==
-                        BACKGROUND_NUMBER : false;
+        return ansiColor.indexOf(ESCAPE_TEXT_END) > 1 && Character.getNumericValue(
+                ansiColor.charAt(ansiColor.indexOf(ESCAPE_TEXT_END) - 2)) ==
+                BACKGROUND_NUMBER;
     }
 
     /**
@@ -303,14 +302,7 @@ public final class ANSIColorConstants
             try
             {
                 int num = Integer.parseInt(test);
-                if(num < MAX_ESCAPE_NUMBER)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return num < MAX_ESCAPE_NUMBER;
             }
             catch(NumberFormatException nfe)
             {

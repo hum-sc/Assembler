@@ -12,18 +12,16 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class Controller implements ActionListener {
-    final Identifier identifier;
     View view;
     public static Model model;
     static int counterProgram;
-    static int conunterProgramInitial = 0;
+    static int conunterProgramInitial = 0; //800 para 320h
+    public static boolean isLittleEndian = true;
 
     public Controller(View view, Model model){
         super();
         this.view = view;
-        this.model = model;
-
-        identifier = new Identifier(model);
+        Controller.model = model;
         model.setFile(new File("C:\\Users\\hum-s\\Documents\\aprendiendoCodificar.asm"));
     }
 
@@ -56,14 +54,14 @@ public class Controller implements ActionListener {
         if(component.startsWith("DUP(")){
             if(!component.endsWith(")")) throw new Exception("Falta el simbolo de cerrado");
             component = component.substring(4, component.length()-1);
-            if(identifier.isByteNumberConstant(component)){
+            if(Identifier.isByteNumberConstant(component)){
                 int number = componentToNumber(component);
                 ArrayList <Integer> array = new ArrayList<>();
                 for (int i = 0; i < length; i++) {
                     array.add(number);
                 }
                 return array;
-            } else if (identifier.isCaracterConstant(component)){
+            } else if (Identifier.isCaracterConstant(component)){
                 ArrayList<String> array = new ArrayList<>();
                 for (int i = 0; i < length; i++) {
                     array.add(component.substring(1,component.length()-1));
@@ -79,7 +77,7 @@ public class Controller implements ActionListener {
             if(!component.endsWith(")")) throw new Exception("Falta el simbolo de cerrado");
             component = component.substring(4, component.length()-1);
 
-            if(!identifier.isWordNumberConstant(component)){
+            if(!Identifier.isWordNumberConstant(component)){
                 throw new Exception("Se necesita una constante númerica de tipo palabra cómo parametro de DUP");
             }
             //TODO: Llenar la tabla
@@ -108,8 +106,8 @@ public class Controller implements ActionListener {
         while (line != null ) {
             component = "";
             model.setCounterProgram(lineCoutner, counterProgram);
-            if (!line.isEmpty() && !line.isBlank() && !identifier.isComment(line)) try{
-                if(identifier.isPseudoInstruction(line)){
+            if (!line.isEmpty() && !line.isBlank() && !Identifier.isComment(line)) try{
+                if(Identifier.isPseudoInstruction(line)){
                     model.addComponent(line, ComponentType.PseudoInstruccion);
                     if(line.equals("ENDS")){
                         if(inStackSegment) inStackSegment = false;
@@ -164,12 +162,12 @@ public class Controller implements ActionListener {
                     line = result[1];
                     component = result[0];
 
-                    if (!identifier.isWordNumberConstant(component))throw new Exception("Se necesita una constante númerica");
+                    if (!Identifier.isWordNumberConstant(component))throw new Exception("Se necesita una constante númerica");
 
                     ComponentType type;
 
-                    if(identifier.isWordHexadecimalConstant(component)) type = ComponentType.ConstanteHexadecimalWord;
-                    else if(identifier.isWordBinaryConstant(component)) type = ComponentType.ConstanteBinariaWord;
+                    if(Identifier.isWordHexadecimalConstant(component)) type = ComponentType.ConstanteHexadecimalWord;
+                    else if(Identifier.isWordBinaryConstant(component)) type = ComponentType.ConstanteBinariaWord;
                     else type = ComponentType.ConstanteDecimalWord;
 
                     model.addComponent(component, type);
@@ -186,7 +184,7 @@ public class Controller implements ActionListener {
                     model.addComponent(component, ComponentType.PseudoInstruccion);
 
 
-                    if(!line.isEmpty() && !identifier.isComment(line)){
+                    if(!line.isEmpty() && !Identifier.isComment(line)){
                         throw new Exception("Se esperaba el fin de la linea");
                     }
                     counterProgram += list.size()*2;
@@ -197,7 +195,7 @@ public class Controller implements ActionListener {
                     line = result[1];
                     component = result[0];
 
-                    if(!identifier.isSymbol(component)) throw new Exception("Se esperaba un simbolo adecuado");
+                    if(!Identifier.isSymbol(component)) throw new Exception("Se esperaba un simbolo adecuado");
                     String symbol = component;
                     model.addComponent(component, ComponentType.Simbolo);
 
@@ -211,10 +209,10 @@ public class Controller implements ActionListener {
                             result = getNextComponent(line);
                             line = result[1];
                             component = result[0];
-                            if (identifier.isByteNumberConstant(component)) {
+                            if (Identifier.isByteNumberConstant(component)) {
                                 model.addComponent(component, ComponentType.ConstanteDecimalByte);
                                 int number = componentToNumber(component);
-                                if (line.isEmpty() || identifier.isComment(line)) {
+                                if (line.isEmpty() || Identifier.isComment(line)) {
                                     model.addSymbol(symbol, SymbolType.Variable, number, SizeType.Byte, counterProgram);
                                     counterProgram += 1;
                                 } else {
@@ -225,7 +223,7 @@ public class Controller implements ActionListener {
                                     ArrayList list = arrayByte(component, number);
                                     model.addComponent(component, ComponentType.PseudoInstruccion);
 
-                                    if (!line.isEmpty() && !identifier.isComment(line)) {
+                                    if (!line.isEmpty() && !Identifier.isComment(line)) {
                                         throw new Exception("Se esperaba el fin de la linea");
                                     }
 
@@ -234,7 +232,7 @@ public class Controller implements ActionListener {
                                     counterProgram += Identifier.isArrayString(list) ? (list.get(0).toString().length())*list.size() : list.size();
 
                                 }
-                            } else if (identifier.isWordNumberConstant(component)) {
+                            } else if (Identifier.isWordNumberConstant(component)) {
                                 if (line.isEmpty()) throw new Exception("Valor palabra en variable byte");
 
                                 model.addComponent(component, ComponentType.ConstanteDecimalWord);
@@ -247,7 +245,7 @@ public class Controller implements ActionListener {
 
                                 model.addComponent(component, ComponentType.PseudoInstruccion);
 
-                                if (!line.isEmpty() || !identifier.isComment(line)) {
+                                if (!line.isEmpty() || !Identifier.isComment(line)) {
                                     throw new Exception("Se esperaba el fin de la linea");
                                 }
 
@@ -256,8 +254,8 @@ public class Controller implements ActionListener {
 
                                 }
                                 counterProgram += Identifier.isArrayString(list) ? (list.get(0).toString().length())*list.size() : list.size();
-                            } else if (identifier.isCaracterConstant(component)) {
-                                if (line.isEmpty() || identifier.isComment(line)) {
+                            } else if (Identifier.isCaracterConstant(component)) {
+                                if (line.isEmpty() || Identifier.isComment(line)) {
                                     model.addComponent(component, ComponentType.CaracterConstante);
                                     model.addSymbol(symbol, SymbolType.Variable, component.substring(1,component.length()-1), SizeType.Byte, counterProgram);
                                     counterProgram += (component.length() - 2);
@@ -269,18 +267,18 @@ public class Controller implements ActionListener {
                             result = getNextComponent(line);
                             line = result[1];
                             component = result[0];
-                            if (identifier.isWordNumberConstant(component)) {
-                                if(identifier.isWordBinaryConstant(component) ||
-                                        identifier.isByteBinaryConstant(component))
+                            if (Identifier.isWordNumberConstant(component)) {
+                                if(Identifier.isWordBinaryConstant(component) ||
+                                        Identifier.isByteBinaryConstant(component))
                                     model.addComponent(component, ComponentType.ConstanteBinariaWord);
-                                else if(identifier.isWordHexadecimalConstant(component) ||
-                                        identifier.isByteHexadecimalConstant(component))
+                                else if(Identifier.isWordHexadecimalConstant(component) ||
+                                        Identifier.isByteHexadecimalConstant(component))
                                     model.addComponent(component, ComponentType.ConstanteHexadecimalWord);
                                 else model.addComponent(component, ComponentType.ConstanteDecimalWord);
 
                                 int number = componentToNumber(component);
 
-                                if (line.isEmpty() || identifier.isComment(line)) {
+                                if (line.isEmpty() || Identifier.isComment(line)) {
                                     model.addSymbol(symbol, SymbolType.Variable, number, SizeType.Word, counterProgram);
                                     counterProgram+=2;
                                 } else {
@@ -291,7 +289,7 @@ public class Controller implements ActionListener {
                                     ArrayList<Integer> list = arrayWord(component, number);
                                     model.addComponent(component, ComponentType.PseudoInstruccion);
 
-                                    if (!line.isEmpty() && !identifier.isComment(line)) {
+                                    if (!line.isEmpty() && !Identifier.isComment(line)) {
                                         throw new Exception("Se esperaba el fin de la linea");
                                     }
                                     model.addSymbol(symbol, SymbolType.Variable, list, SizeType.Word, counterProgram);
@@ -306,9 +304,9 @@ public class Controller implements ActionListener {
                             line = result[1];
                             component = result[0];
 
-                            if(!line.isEmpty() && !identifier.isComment(line))throw new Exception("Se esperaba el fin de la linea");
-                            if (identifier.isWordNumberConstant(component)) {
-                                model.addComponent(component, identifier.identifyComponent(component));
+                            if(!line.isEmpty() && !Identifier.isComment(line))throw new Exception("Se esperaba el fin de la linea");
+                            if (Identifier.isWordNumberConstant(component)) {
+                                model.addComponent(component, Identifier.identifyComponent(component));
                                 model.addSymbol(symbol, SymbolType.Constante, componentToNumber(component), SizeType.Word);
 
                             } else throw new Exception("Se esperaba una constante numerica");
@@ -324,9 +322,9 @@ public class Controller implements ActionListener {
                     line = result[1];
                     component = result[0];
 
-                    if(identifier.isInstruction(component)){
+                    if(Identifier.isInstruction(component)){
                         Instruction instruction = model.getInstruction(component);
-                        if(line.isEmpty() || identifier.isComment(line)){
+                        if(line.isEmpty() || Identifier.isComment(line)){
                             boolean isSintaxCorrect = instruction.checkSintax();
                             if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"sin operandos");
                             model.addComponent(component, ComponentType.Instruccion);
@@ -358,7 +356,7 @@ public class Controller implements ActionListener {
                                 //TODO: Aumentar el CP
                                 counterProgram+=machineCode.length()/8;
                             } else{
-                                model.addComponent(component, identifier.identifyComponent(component));
+                                model.addComponent(component, Identifier.identifyComponent(component));
                                 String firstOperand = component;
                                 result = model.getNextOperand(line);
                                 line = result[1];
@@ -367,13 +365,13 @@ public class Controller implements ActionListener {
 
 
 
-                                OperandType type2 = identifier.identifyOperand(component);
+                                OperandType type2 = Identifier.identifyOperand(component);
                                 if(type2 == OperandType.INVALID) {
                                     throw new Exception("Se esperaba un operando valido");
                                 }
                                 boolean isSintaxCorrect = instruction.checkSintax(firstOperand, component);
                                 if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString()+" y "+type2.toString());
-                                model.addComponent(component, identifier.identifyComponent(component));
+                                model.addComponent(component, Identifier.identifyComponent(component));
                                 String machineCode = instruction.encode(firstOperand, component);
                                 model.addMachineCode(lineCoutner, machineCode);
 
@@ -381,7 +379,7 @@ public class Controller implements ActionListener {
                                 counterProgram+=machineCode.length()/8;
                             }
                         }
-                    } else if(identifier.isTag(component)){
+                    } else if(Identifier.isTag(component)){
                         component = component.substring(0,component.length()-1);
                         model.addSymbol(component, SymbolType.Etiqueta, counterProgram, null, counterProgram);
                         model.addComponent(component, ComponentType.Etiqueta);
@@ -423,7 +421,7 @@ public class Controller implements ActionListener {
                 }
             }
             line = result[1];
-            if(!result[0].isEmpty()) model.addComponent(result[0], identifier.identifyComponent(result[0]));
+            if(!result[0].isEmpty()) model.addComponent(result[0], Identifier.identifyComponent(result[0]));
         }
     }
 
@@ -432,7 +430,7 @@ public class Controller implements ActionListener {
         //separateLines();
         //identifyComponents();
         analysisSyntacticSemantic();
-        view.showAssembledPage(this,model.getFile(),model.getComponentList(),model.getErrors(), model.getErrorLines(), model.getSymbolData(), model.getCounterProgram(), model.getHexMachineCode());
+        view.showAssembledPage(this,model.getFile(),model.getComponentList(),model.getErrors(), model.getErrorLines(), model.getSymbolData(), model.getCounterProgram(), model.getHexMachineCode(), model.maxCPLength, model.maxCODELength);
 
     }
 
@@ -526,7 +524,7 @@ public class Controller implements ActionListener {
                         break;
                     }
                 }
-                if (identifier.isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
+                if (Identifier.isSeparator(c) && !possibleCommentDoubleQuote && !possibleCommentSingleQuote) {
                     if(c ==':') component.append(c);
                     characterCounter++;
                     if(component.isEmpty()) continue;

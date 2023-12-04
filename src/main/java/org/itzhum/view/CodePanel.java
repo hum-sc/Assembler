@@ -27,14 +27,13 @@ public class CodePanel extends JPanel implements ActionListener {
 
 
     private String remaining = "";
-    protected Color currentColor = ANSIColorConstants.COLOR_RESET;;
+    protected Color currentColor = ANSIColorConstants.COLOR_RESET;
     protected boolean isBackground = false;
-    protected StringBuffer typed = new StringBuffer("");
-    private boolean colorMode;
+    protected StringBuffer typed = new StringBuffer();
+    private final boolean colorMode;
     public CodePanel(String content){
         super();
 
-        this.setBorder(BorderFactory.createLineBorder(Color.orange));
         this.setLayout(new BorderLayout());
 
 
@@ -64,7 +63,7 @@ public class CodePanel extends JPanel implements ActionListener {
         //this.setPreferredSize();
         this.append(content);
 
-        codeArea.setBorder(BorderFactory.createLineBorder(Color.orange));
+
 
 
 
@@ -84,7 +83,6 @@ public class CodePanel extends JPanel implements ActionListener {
     public CodePanel(String content, String[] counterProgram){
         super();
 
-        this.setBorder(BorderFactory.createLineBorder(Color.orange));
         this.setLayout(new BorderLayout());
 
 
@@ -113,8 +111,6 @@ public class CodePanel extends JPanel implements ActionListener {
         codeArea.setForeground(ANSIColorConstants.COLOR_RESET);
         //this.setPreferredSize();
         this.append(content);
-
-        codeArea.setBorder(BorderFactory.createLineBorder(Color.orange));
 
 
 
@@ -133,10 +129,10 @@ public class CodePanel extends JPanel implements ActionListener {
         codeArea.setCaretPosition(0);
     }
 
-    public CodePanel(String content, String[] counterProgram, String[] machineCode){
+    public CodePanel(String content, String[] counterProgram, String[] machineCode, int maxCPLength, int maxMCLength){
         super();
 
-        this.setBorder(BorderFactory.createLineBorder(Color.orange));
+
         this.setLayout(new BorderLayout());
 
 
@@ -166,7 +162,6 @@ public class CodePanel extends JPanel implements ActionListener {
         //this.setPreferredSize();
         this.append(content);
 
-        codeArea.setBorder(BorderFactory.createLineBorder(Color.orange));
 
 
 
@@ -174,11 +169,11 @@ public class CodePanel extends JPanel implements ActionListener {
 
         codeScrollPane = new JScrollPane(codeArea);
         codeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        codeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        codeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         codeScrollPane.setMaximumSize(new Dimension(this.getWidth()-25, this.getHeight()-navigationBar.getHeight()));
         codeScrollPane.setRowHeaderView(numberLineArea);
 
-        lineNumbers = new LineNumbersView(codeArea, counterProgram, machineCode);
+        lineNumbers = new LineNumbersView(codeArea, counterProgram, machineCode, maxCPLength, maxMCLength);
 
         codeScrollPane.setRowHeaderView(lineNumbers);
 
@@ -194,10 +189,10 @@ public class CodePanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("next")){
-            codeScrollPane.getVerticalScrollBar().setValue(codeScrollPane.getVerticalScrollBar().getValue()+300);
+            codeScrollPane.getVerticalScrollBar().setValue(codeScrollPane.getVerticalScrollBar().getValue()+codeScrollPane.getHeight()-30);
 
         } else if (e.getActionCommand().equals("previous")){
-            codeScrollPane.getVerticalScrollBar().setValue(codeScrollPane.getVerticalScrollBar().getValue()-300);
+            codeScrollPane.getVerticalScrollBar().setValue(codeScrollPane.getVerticalScrollBar().getValue()-codeScrollPane.getHeight()+30);
 
         }
 
@@ -263,7 +258,7 @@ public class CodePanel extends JPanel implements ActionListener {
                 if(mIndex < 0)
                 {
                     //the buffer ends halfway through the ansi string!
-                    this.remaining = addString.substring(aPos, addString.length());
+                    this.remaining = addString.substring(aPos);
                     stillSearching = false;
                     continue;
                 }
@@ -300,7 +295,7 @@ public class CodePanel extends JPanel implements ActionListener {
                 if(aIndex == -1)
                 {
                     //if that was the last sequence of the input, send remaining text
-                    tmpString = addString.substring(aPos, addString.length());
+                    tmpString = addString.substring(aPos);
                     this.append(tmpString, this.currentColor, this.isBackground);
                     stillSearching = false;
                     //jump out of loop early, as the whole string has been sent

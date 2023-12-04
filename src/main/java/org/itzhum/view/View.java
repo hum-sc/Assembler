@@ -117,7 +117,7 @@ public class View extends JFrame {
 
     }
 
-    public void showAssembledPage(ActionListener listener, String code, String[] componentList, String errors, int[] errorLines, Object[][] symbolDataTable, String[]counterProgram, String[] machineCode ){
+    public void showAssembledPage(ActionListener listener, String code, String[] componentList, String errors, int[] errorLines, Object[][] symbolDataTable, String[]counterProgram, String[] machineCode, int maxCPLength, int maxMCLength ){
         JPanel header;
         JButton first;
         JLabel title;
@@ -174,15 +174,18 @@ public class View extends JFrame {
 
         northSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-        CodePanel codePanel = new CodePanel(code, counterProgram, machineCode);
+        CodePanel codePanel = new CodePanel(code, counterProgram, machineCode, maxCPLength, maxMCLength);
         codePanel.setErrorLines(errorLines);
         ComponentPanel componentPanel = new ComponentPanel(componentList);
         DataPanel errorPanel = new DataPanel(errors, northSplit);
 
         TablePanel tablePanel = new TablePanel(symbolDataTable, new Object[]{"Simbolo","Tipo", "Valor", "Tama\u00f1o", "Direccion"});
 
+        verticalSplit.add(componentPanel);
+        verticalSplit.add(tablePanel);
+
         northSplit.setLeftComponent(codePanel);
-        northSplit.setRightComponent(componentPanel);
+        northSplit.setRightComponent(verticalSplit);
 
         southSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 /*
@@ -193,18 +196,16 @@ public class View extends JFrame {
 */
         northSplit.setDividerLocation((getWidth()/3)*2);
 
-        verticalSplit.add(northSplit);
-        verticalSplit.add(tablePanel);
 
         verticalSplit.setDividerLocation((getHeight()/5)*3);
 
-        container.add(verticalSplit, BorderLayout.CENTER);
+        container.add(northSplit, BorderLayout.CENTER);
 
 
         updateUI(container);
     }
 
-    public File getFile() throws FileNotFoundException, ProcessCanceledException, Exception{
+    public File getFile() throws Exception{
         JFileChooser chooser = new JFileChooser();
 
         int retVal = chooser.showOpenDialog(this);

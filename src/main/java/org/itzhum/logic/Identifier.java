@@ -5,12 +5,10 @@ import org.itzhum.types.*;
 
 import java.util.ArrayList;
 
-public class Identifier {
-    public static Model model;
+import static org.itzhum.Controller.model;
 
-    public Identifier(Model model) {
-        Identifier.model = model;
-    }
+public class Identifier {
+
 
     public static boolean isArrayString(ArrayList lista) {
         return lista.get(0).getClass().equals(String.class);

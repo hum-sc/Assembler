@@ -29,6 +29,8 @@ public class Model {
     private String[] hexMachineCode;
     private String[] binMachineCode;
     private int maxLineLength = 0;
+    public int maxCPLength = 0;
+    public int maxCODELength = 0;
 
     public Model() {
         pseudoInstructions = new HashMap<>();
@@ -198,8 +200,8 @@ public class Model {
         components.add(new AssemblerComponent(component.replace("\t", ""), type));
     }
     public void setCounterProgram(int lineNumber, int counter){
-
         counterProgram[lineNumber] ="0"+Integer.toHexString(counter).toUpperCase()+"H";
+        if (counterProgram[lineNumber].length() > maxCPLength) maxCPLength = counterProgram[lineNumber].length();
     }
     public void setError(Integer lineNumber, String error){
         errors.put(lineNumber, error);
@@ -338,7 +340,13 @@ public class Model {
     }
 
     public String[] getCounterProgram() {
-        return counterProgram;
+        String[] lcounterProgram = new String[this.counterProgram.length];
+        for (int i = 0; i < this.counterProgram.length; i++) {
+            if(counterProgram[i] == null) lcounterProgram[i] = "";
+            else if(counterProgram[i].length() < maxCPLength) lcounterProgram[i] = "0".repeat(maxCPLength-counterProgram[i].length())+counterProgram[i];
+            else lcounterProgram[i] = counterProgram[i];
+        }
+        return lcounterProgram;
     }
 
     public void addSymbol(String name, SymbolType type, int value, SizeType size) throws Exception {
@@ -430,6 +438,12 @@ public class Model {
     }
 
     public String[] getHexMachineCode() {
+        String[] lHexMachineCode = new String[hexMachineCode.length];
+        for (int i = 0; i < hexMachineCode.length; i++) {
+            if(hexMachineCode[i] == null) lHexMachineCode[i] = "";
+            else if(hexMachineCode[i].length() < maxCODELength) lHexMachineCode[i] = "0".repeat(maxCODELength-hexMachineCode[i].length())+hexMachineCode[i];
+            else lHexMachineCode[i] = hexMachineCode[i];
+        }
         return hexMachineCode;
     }
 
@@ -439,7 +453,11 @@ public class Model {
      * @param encode Codigo en binario
      */
     public void addMachineCode(int lineCoutner, String encode) {
+
         hexMachineCode[lineCoutner] = Integer.toHexString(Integer.parseUnsignedInt(encode, 2)).toUpperCase();
+        if(hexMachineCode[lineCoutner].length() %2 != 0) hexMachineCode[lineCoutner] = "0"+hexMachineCode[lineCoutner];
+        hexMachineCode[lineCoutner] = "0"+hexMachineCode[lineCoutner]+"H";
+        if (hexMachineCode[lineCoutner].length() > maxCODELength) maxCODELength = hexMachineCode[lineCoutner].length();
         binMachineCode[lineCoutner] = encode;
     }
 

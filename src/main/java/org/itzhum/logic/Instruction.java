@@ -92,19 +92,19 @@ public class Instruction {
             if(firstOperand == OperandType.MEMORY) {
                 lFirstOperand = OperandType.MEMORYBYTE;
                 if (secondOperand != OperandType.MEMORY) {
-                    OperandPairAccepted.add(firstOperand.toString() + "," + lSecondOperand.toString());
-                    Codes.put(firstOperand.toString() + "," + lSecondOperand.toString(),code);
+                    OperandPairAccepted.add(firstOperand + "," + lSecondOperand.toString());
+                    Codes.put(firstOperand + "," + lSecondOperand,code);
                 }
             }
             if(secondOperand == OperandType.MEMORY) {
                 lSecondOperand = OperandType.MEMORYBYTE;
                 if (firstOperand != OperandType.MEMORY) {
-                    OperandPairAccepted.add(lFirstOperand.toString() + "," + secondOperand.toString());
-                    Codes.put(lFirstOperand.toString() + "," + secondOperand.toString(),code);
+                    OperandPairAccepted.add(lFirstOperand.toString() + "," + secondOperand);
+                    Codes.put(lFirstOperand + "," + secondOperand,code);
                 }
             }
             OperandPairAccepted.add(lFirstOperand.toString()+","+lSecondOperand.toString());
-            Codes.put(lFirstOperand.toString()+","+lSecondOperand.toString(),code);
+            Codes.put(lFirstOperand +","+ lSecondOperand,code);
         }
         if (acceptWordByte){
             if(firstOperand == OperandType.REGISTER) lFirstOperand = OperandType.REGISTERWORD;
@@ -113,24 +113,24 @@ public class Instruction {
             if(firstOperand == OperandType.MEMORY) {
                 lFirstOperand = OperandType.MEMORYWORD;
                 if (secondOperand != OperandType.MEMORY) {
-                    OperandPairAccepted.add(firstOperand.toString() + "," + lSecondOperand.toString());
-                    Codes.put(firstOperand.toString() + "," + lSecondOperand.toString(),code);
+                    OperandPairAccepted.add(firstOperand + "," + lSecondOperand.toString());
+                    Codes.put(firstOperand + "," + lSecondOperand,code);
                 }
             }
             if(secondOperand == OperandType.MEMORY) {
                 lSecondOperand = OperandType.MEMORYBYTE;
                 if (firstOperand != OperandType.MEMORY) {
-                    OperandPairAccepted.add(lFirstOperand.toString() + "," + secondOperand.toString());
-                    Codes.put(lFirstOperand.toString() + "," + secondOperand.toString(),code);
+                    OperandPairAccepted.add(lFirstOperand.toString() + "," + secondOperand);
+                    Codes.put(lFirstOperand + "," + secondOperand,code);
                 }
             }
 
             OperandPairAccepted.add(lFirstOperand.toString()+","+lSecondOperand.toString());
-            Codes.put(lFirstOperand.toString()+","+lSecondOperand.toString(),code);
+            Codes.put(lFirstOperand +","+ lSecondOperand,code);
         }
         if(firstOperand == OperandType.MEMORY && secondOperand == OperandType.MEMORY){
-            OperandPairAccepted.add(firstOperand.toString()+","+secondOperand.toString());
-            Codes.put(firstOperand.toString()+","+secondOperand.toString(),code);
+            OperandPairAccepted.add(firstOperand +","+ secondOperand);
+            Codes.put(firstOperand +","+ secondOperand,code);
         }
         if (acceptWordWord){
             if (firstOperand== OperandType.REGISTER) lFirstOperand = OperandType.REGISTERWORD;
@@ -138,23 +138,23 @@ public class Instruction {
             if (firstOperand== OperandType.MEMORY) {
                 lFirstOperand = OperandType.MEMORYWORD;
                 if (secondOperand!= OperandType.MEMORY){
-                    OperandPairAccepted.add(firstOperand.toString()+","+lSecondOperand.toString());
-                    Codes.put(firstOperand.toString()+","+lSecondOperand.toString(),code);
+                    OperandPairAccepted.add(firstOperand +","+lSecondOperand.toString());
+                    Codes.put(firstOperand +","+ lSecondOperand,code);
                 }
             }
             if (secondOperand== OperandType.MEMORY){
                 lSecondOperand = OperandType.MEMORYWORD;
                 if (firstOperand!= OperandType.MEMORY) {
-                    OperandPairAccepted.add(lFirstOperand.toString()+","+secondOperand.toString());
-                    Codes.put(lFirstOperand.toString()+","+secondOperand.toString(),code);
+                    OperandPairAccepted.add(lFirstOperand.toString()+","+ secondOperand);
+                    Codes.put(lFirstOperand +","+ secondOperand,code);
                 }
             }
             OperandPairAccepted.add(lFirstOperand.toString()+","+lSecondOperand.toString());
-            Codes.put(lFirstOperand.toString()+","+lSecondOperand.toString(),code);
+            Codes.put(lFirstOperand +","+ lSecondOperand,code);
         }
         if(!acceptWordByte && !acceptByteByte && !acceptWordWord) {
             OperandPairAccepted.add(firstOperand.toString()+","+secondOperand.toString());
-            Codes.put(firstOperand.toString()+","+secondOperand.toString(),code);
+            Codes.put(firstOperand +","+ secondOperand,code);
         }
     }
 
@@ -215,7 +215,7 @@ public class Instruction {
             for (String op : OperandPairAccepted) {
                 errorMsg.append(op).append(" o ");
             }
-            errorMsg.append(" pero se recibio ").append(firstOperandType.toString()).append(",").append(secondOperandType.toString());
+            errorMsg.append(" pero se recibio ").append(firstOperandType).append(",").append(secondOperandType);
             throw new Exception(errorMsg.toString());
         }
         return OperandPairAccepted.contains(operandCombination);

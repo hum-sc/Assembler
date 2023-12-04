@@ -110,7 +110,7 @@ public class Code {
 
                 int jump =  tagDirection - counterProgram;
 
-                shift = getTagShift(jump);
+                shift = getShift(jump);
             }
         }
 
@@ -119,20 +119,23 @@ public class Code {
     }
 
     private String getInm(int number) {
+        String inm = "";
         if(number < 256){
-            String inm = Integer.toBinaryString(number);
+            inm = Integer.toBinaryString(number);
             if(inm.length() < 8){
                 inm = "0".repeat(8-inm.length())+inm;
             }
-            return inm;
         }
         else{
-            String inm = Integer.toBinaryString(number);
+            inm = Integer.toBinaryString(number);
             if(inm.length() < 16){
                 inm = "0".repeat(16-inm.length())+inm;
             }
-            return inm;
         }
+        if(inm.length() == 16 && Controller.isLittleEndian){
+            inm = inm.substring(8,16)+inm.substring(0,8);
+        }
+        return  inm;
     }
 
     public String generateCode(String des, String fuente) throws Exception {
@@ -316,7 +319,6 @@ public class Code {
             }
         }
 
-
         return mod+lreg+rm+desp;
     }
 
@@ -336,7 +338,7 @@ public class Code {
     }
     private String getShift(int shift) throws Exception {
 
-        String despString = Integer.toBinaryString(shift);
+        String shiftString = Integer.toBinaryString(shift);
         int shiftAbs = Math.abs(shift);
 
         if((shiftMax == 0 && shift!= 0))throw new Exception("No se esperaba desplazamiento");
@@ -345,19 +347,19 @@ public class Code {
 
 
         if(shiftMin <= 1){
-            if(shift < 0 && shiftAbs <= 128) despString = despString.substring(despString.length()-8);
-            if(despString.length() < 8) despString = "0".repeat(8-despString.length())+despString;
+            if(shift < 0 && shiftAbs <= 128) shiftString = shiftString.substring(shiftString.length()-8);
+            if(shiftString.length() < 8) shiftString = "0".repeat(8-shiftString.length())+shiftString;
         }
         if(shiftMin == 2){
-            if(shift < 0 && shiftAbs <= 32768) despString = despString.substring(despString.length()-16);
-            else if(despString.length()<16) despString = "0".repeat(16-despString.length())+despString;
+            if(shift < 0 && shiftAbs <= 32768) shiftString = shiftString.substring(shiftString.length()-16);
+            else if(shiftString.length()<16) shiftString = "0".repeat(16-shiftString.length())+shiftString;
         }
         if(shiftMax == 1){
             if(shift < 0){
                 if(shiftAbs > 128) throw new Exception("Desplazamiento fuera de rango");
             }
             if(shift > 0){
-                if(despString.length() < 8) despString = "0".repeat(8-despString.length())+despString;
+                if(shiftString.length() < 8) shiftString = "0".repeat(8-shiftString.length())+shiftString;
             }
         }
         if (shiftMax == 2){
@@ -365,25 +367,30 @@ public class Code {
                 if(shiftAbs > 32768) throw new Exception("Desplazamiento fuera de rango");
                 if(shiftAbs <= 128){
                     if(shiftMin <= 1){
-                        despString = despString.substring(despString.length()-8);
+                        shiftString = shiftString.substring(shiftString.length()-8);
                     }else if (shiftMin == 2){
-                        despString = despString.substring(despString.length()-16);
+                        shiftString = shiftString.substring(shiftString.length()-16);
                     }
                 }
                 if (shiftAbs > 128){
-                    despString = despString.substring(despString.length()-16);
+                    shiftString = shiftString.substring(shiftString.length()-16);
                 }
             }else if (shift > 0){
                 if(shiftMin <= 1) {
-                    if (despString.length() <= 8) despString = "0".repeat(8 - despString.length()) + despString;
-                    else despString = "0".repeat(16 - despString.length()) + despString;
+                    if (shiftString.length() <= 8) shiftString = "0".repeat(8 - shiftString.length()) + shiftString;
+                    else shiftString = "0".repeat(16 - shiftString.length()) + shiftString;
                 }else if (shiftMin == 2){
-                    if (despString.length() < 16) despString = "0".repeat(16 - despString.length()) + despString;
+                    if (shiftString.length() < 16) shiftString = "0".repeat(16 - shiftString.length()) + shiftString;
                 }
             }
 
         }
-        return despString;
+
+        if(shiftString.length() == 16 && Controller.isLittleEndian){
+            shiftString = shiftString.substring(8,16)+shiftString.substring(0,8);
+        }
+
+        return shiftString;
     }
 
 }

@@ -6,9 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class ComponentPanel extends JPanel implements ActionListener {
-    private JTextPane componentArea;
-    private JTextPane componentTypeArea;
-    private JScrollPane componentScrollPane;
+    private final JTextPane componentArea;
+    private final JTextPane componentTypeArea;
+    private final JScrollPane componentScrollPane;
     public ComponentPanel(String[] componentList){
         super();
         this.setLayout(new BorderLayout());

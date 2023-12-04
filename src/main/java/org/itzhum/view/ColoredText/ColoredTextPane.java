@@ -59,7 +59,7 @@ public class ColoredTextPane extends JTextPane implements Printable
     /**
      * A history of what has been {@link #append(String) appended}.
      */
-    protected StringBuffer typed = new StringBuffer("");
+    protected StringBuffer typed = new StringBuffer();
 
     private String remaining = "";
     //enable colors or not.
@@ -95,8 +95,8 @@ public class ColoredTextPane extends JTextPane implements Printable
         Component parent = this.getParent();
         ComponentUI ui = this.getUI();
 
-        return parent != null ? (ui.getPreferredSize(this).width <=
-                parent.getSize().width) : true;
+        return parent == null || (ui.getPreferredSize(this).width <=
+                parent.getSize().width);
     }
 
     /**
@@ -235,7 +235,7 @@ public class ColoredTextPane extends JTextPane implements Printable
                 if(mIndex < 0)
                 {
                     //the buffer ends halfway through the ansi string!
-                    this.remaining = addString.substring(aPos, addString.length());
+                    this.remaining = addString.substring(aPos);
                     stillSearching = false;
                     continue;
                 }
@@ -272,7 +272,7 @@ public class ColoredTextPane extends JTextPane implements Printable
                 if(aIndex == -1)
                 {
                     //if that was the last sequence of the input, send remaining text
-                    tmpString = addString.substring(aPos, addString.length());
+                    tmpString = addString.substring(aPos);
                     this.append(tmpString, this.currentColor, this.isBackground);
                     stillSearching = false;
                     //jump out of loop early, as the whole string has been sent

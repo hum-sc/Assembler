@@ -1,5 +1,7 @@
 package org.itzhum.view;
 
+import jdk.dynalink.beans.StaticClass;
+
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -19,11 +21,13 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
 
     private static final long serialVersionUID = 1L;
     private static int MARGIN_WIDTH_PX = 54;
+private static int WORD_FONT_WIDTH_PX = 10;
+    private int maxLength = 4;
     private String[] numbersAdded;
 
-    private JTextComponent editor;
+    private final JTextComponent editor;
 
-    private Set<Integer> errors;
+    private final Set<Integer> errors;
 
     private Font font;
 
@@ -51,14 +55,16 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
 
     }
 
-    public LineNumbersView(JTextPane editor, String[] numbers, String[] numbersAdded) {
+    public LineNumbersView(JTextPane editor, String[] numbers, String[] numbersAdded, int maxNumbersLength, int maxNumbersAddedLength) {
         this.editor = editor;
         this.errors = new HashSet<Integer>();
 
         editor.getDocument().addDocumentListener(this);
         editor.addComponentListener(this);
         editor.addCaretListener(this);
-        MARGIN_WIDTH_PX = 130;
+        maxLength = maxNumbersLength+maxNumbersAddedLength+2;
+        MARGIN_WIDTH_PX = WORD_FONT_WIDTH_PX* maxLength+WORD_FONT_WIDTH_PX;
+        System.out.println(MARGIN_WIDTH_PX);
         this.numbers = numbers;
         this.numbersAdded = numbersAdded;
     }
@@ -114,7 +120,7 @@ class LineNumbersView extends JComponent implements DocumentListener, CaretListe
         if(numbers != null){
             if(numbersAdded != null){
                 if(numbersAdded[index] == null) return line.getStartOffset() == offset ? numbers[index]:null;
-                return line.getStartOffset() == offset ? numbers[index] +" "+ numbersAdded[index]:null;
+                return line.getStartOffset() == offset ? numbers[index] +" ".repeat(maxLength-(numbers[index].length()+numbersAdded[index].length()))+ numbersAdded[index]:null;
             }
             return line.getStartOffset() == offset ? numbers[index]:null;
         }
