@@ -144,9 +144,6 @@ public class Code {
         boolean isDestWord = destType.toString().contains("WORD");
         boolean isFuenteWord = fuenteType.toString().contains("WORD");
 
-        System.out.println("isDestWord "+des+": " + isDestWord+ " isFuenteWord "+fuente+": " + isFuenteWord);
-
-
         if(fuenteType == OperandType.INMEDIATE){
             //TODO:Checar cuando afecta s
             if(Identifier.isWordNumberConstant(fuente)){

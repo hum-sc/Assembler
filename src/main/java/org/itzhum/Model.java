@@ -102,7 +102,6 @@ public class Model {
                 //System.out.println(parts[0]+" "+isTwoOperands);
                 try {
                     if (isTwoOperands) {
-                        System.out.println(parts[0]);
                         if (parts[9].equals("1")) {
                             lcode = new Code(parts[43], parts[51], parts[59], parts[67]);
                             instruction.addPairOperandAccepted(OperandType.REGISTER, OperandType.MEMORY, lcode);
@@ -142,7 +141,7 @@ public class Model {
                 }
 
                 instructions.put(parts[0].toUpperCase(), instruction);
-                instruction.printCodes();
+
             }
 
             configFile = new File(pathBase+"\\src\\main\\settings\\registersComplete.cfg");
@@ -188,7 +187,6 @@ public class Model {
             counterProgram = new String[counter+10];
             hexMachineCode = new String[counter+10];
             binMachineCode = new String[counter+10];
-            System.out.println(counterProgram.length);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

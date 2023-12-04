@@ -1,8 +1,12 @@
 package org.itzhum.logic;
 
 import org.itzhum.Code;
+import org.itzhum.Controller;
 import org.itzhum.types.OperandType;
+import org.itzhum.types.Symbol;
+import org.itzhum.types.SymbolType;
 
+import javax.naming.ldap.Control;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -188,7 +192,10 @@ public class Instruction {
         return true;
     }
 
-    public boolean checkSintax(OperandType firstOperand, OperandType secondOperand) throws Exception {
+    public boolean checkSintax(String firstOperand, String secondOperand) throws Exception {
+        OperandType firstOperandType = Identifier.identifyOperand(firstOperand);
+        OperandType secondOperandType = Identifier.identifyOperand(secondOperand);
+        String operandCombination = firstOperandType.toString() + "," + secondOperandType.toString();
         if (!hasTwoOperands) {
             String errorMsg = "Instruccion " + name + " necesita ";
             if (hasNoOperand) {
@@ -197,15 +204,21 @@ public class Instruction {
             }
             if (hasOneOperand) errorMsg += "un operando";
             throw new Exception(errorMsg);
-        } else if (!OperandPairAccepted.contains(firstOperand.toString() + "," + secondOperand.toString())) {
+        } else if (!OperandPairAccepted.contains(operandCombination)) {
+            if(Controller.model.findSymbol(secondOperand)) {
+                Symbol symbol = Controller.model.getSymbol(secondOperand);
+                if(symbol.getType() == SymbolType.Constante) {
+                    return OperandPairAccepted.contains(firstOperandType+","+OperandType.INMEDIATE);
+                }
+            }
             StringBuilder errorMsg = new StringBuilder("Instruccion " + name + " necesita una combinacion de operandos ");
             for (String op : OperandPairAccepted) {
                 errorMsg.append(op).append(" o ");
             }
-            errorMsg.append(" pero se recibio ").append(firstOperand.toString()).append(",").append(secondOperand.toString());
+            errorMsg.append(" pero se recibio ").append(firstOperandType.toString()).append(",").append(secondOperandType.toString());
             throw new Exception(errorMsg.toString());
         }
-        return hasTwoOperands && OperandPairAccepted.contains(firstOperand.toString() + "," + secondOperand.toString());
+        return OperandPairAccepted.contains(operandCombination);
     }
 
 
@@ -217,24 +230,29 @@ public class Instruction {
 
     public String encode(String operand) throws Exception {
         //String dir = DirectionSpecifier.generateDirection();
-        String operandType = Identifier.identifyOperand(operand).toString();
-        Code code = Codes.get(operandType);
+        OperandType operandType = Identifier.identifyOperand(operand);
+        if(operandType == OperandType.CONSTANT){
+            operand = Controller.model.getSymbol(operand).getValue().toString();
+            if(Identifier.isWordNumberConstant(operand)){
+                operandType = OperandType.INMEDIATE;
+            }
+        }
+        Code code = Codes.get(operandType.toString());
         return code.generateCode(operand);
     }
 
     public String encode(String firstOperand, String secondOperand) throws Exception {
         //String dir = DirectionSpecifier.generateDirection();
-        String firstType = Identifier.identifyOperand(firstOperand).toString();
-        String secondType = Identifier.identifyOperand(secondOperand).toString();
-
+        OperandType firstType = Identifier.identifyOperand(firstOperand);
+        OperandType secondType = Identifier.identifyOperand(secondOperand);
+        if(secondType == OperandType.CONSTANT){
+            secondOperand = Controller.model.getSymbol(secondOperand).getValue().toString();
+            if (Identifier.isWordNumberConstant(secondOperand)){
+                secondType = OperandType.INMEDIATE;
+            }
+            System.out.println(secondType+","+secondOperand);
+        }
         Code code = Codes.get(firstType+","+secondType);
         return code.generateCode(firstOperand, secondOperand);
-    }
-
-    public void printCodes(){
-        for (String key: Codes.keySet()
-             ) {
-            System.out.println(key);
-        }
     }
 }

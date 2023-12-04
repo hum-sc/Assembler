@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Controller implements ActionListener {
     final Identifier identifier;
     View view;
-    static Model model;
+    public static Model model;
     static int counterProgram;
     static int conunterProgramInitial = 0;
 
@@ -371,7 +371,7 @@ public class Controller implements ActionListener {
                                 if(type2 == OperandType.INVALID) {
                                     throw new Exception("Se esperaba un operando valido");
                                 }
-                                boolean isSintaxCorrect = instruction.checkSintax(type, type2);
+                                boolean isSintaxCorrect = instruction.checkSintax(firstOperand, component);
                                 if(!isSintaxCorrect) throw new Exception("No está definida la instruccion "+component+"con un operando de tipo "+type.toString()+" y "+type2.toString());
                                 model.addComponent(component, identifier.identifyComponent(component));
                                 String machineCode = instruction.encode(firstOperand, component);

@@ -175,7 +175,8 @@ public class Identifier {
             case Simbolo -> {
                 if(model.findSymbol(component)){
                     Symbol symbol = model.getSymbol(component);
-
+                    if(symbol.getType() == SymbolType.Constante)
+                        return OperandType.CONSTANT;
                     if(symbol.getSize() == SizeType.Byte)
                         return OperandType.MEMORYBYTE;
                     else return OperandType.MEMORYWORD;
